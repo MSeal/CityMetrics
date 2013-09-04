@@ -33,3 +33,10 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Data dumps
+mappingbased_properties*
+data/archive
+crime.pck
+police.pck
+city_resources.pck

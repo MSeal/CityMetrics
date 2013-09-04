@@ -1,0 +1,5 @@
+Caution Against Ranking
+ 
+Each year when Crime in the United States is published, some entities use reported figures to compile rankings of cities and counties. These rough rankings provide no insight into the numerous variables that mold crime in a particular town, city, county, state, or region. Consequently, they lead to simplistic and/or incomplete analyses that often create misleading perceptions adversely affecting communities and their residents. Valid assessments are possible only with careful study and analysis of the range of unique conditions affecting each local law enforcement jurisdiction. The data user is, therefore, cautioned against comparing statistical data of individual reporting units from cities, metropolitan areas, states, or colleges or universities solely on the basis of their population coverage or student enrollment.
+
+See FBI Caution Against Ranking <http://www2.fbi.gov/ucr/cius2009/about/variables_affecting_crime.html> for additional information.
