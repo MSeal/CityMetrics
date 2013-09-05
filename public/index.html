@@ -10,7 +10,7 @@
       <div>Examples:</div>
       <div class="examples"><a href="#">Houston vs. Dallas</a><a href="#">San Francisco, Portland, Boulder, New York City</a></div><br/>
       <div class="city-inputs">
-        <input type="text" value="" placeholder="Type city name, e.g. Texas" class="form-control cityname"/><span class="btn btn-default go">Go</span><span class="btn btn-info random">Random</span>
+        <input type="text" value="" placeholder="Type city name, e.g. San Francisco" class="form-control cityname"/><span class="btn btn-default go">Go</span><span class="btn btn-info random">Random</span>
       </div>
       <div>Select on map</div>
       <svg id="map"></svg>
@@ -103,9 +103,13 @@
               <div class="cinput">
                 <div class="input-append"><input type="text" value="<%- typeof city !== 'undefined' ? city : '' %>" placeholder="city name" class="form-control"/>
                   <button type="submit" class="btn remove"><i class="glyphicon glyphicon-remove"></i></button>
-                </div><span>vs.</span>
+                </div>
               </div><% }) %>
-        <div class="cinput"><input type="text" value="<%- typeof city !== 'undefined' ? city : '' %>" placeholder="city name" class="form-control"/></div><span class="btn btn-default">Go</span><span class="btn btn-info">Random</span>
+              <div class="cinput">
+                <div class="input-append"><input type="text" value="<%- typeof city !== 'undefined' ? city : '' %>" placeholder="city name" class="form-control"/>
+                  <button type="submit" class="btn remove"><i class="glyphicon glyphicon-remove"></i></button>
+                </div>
+              </div><span class="btn btn-default go">Go</span><span class="btn btn-info random">Random</span>
       </div>
     </script>
   </head>

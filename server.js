@@ -27,8 +27,8 @@ app.get('/api/listmetric', function(req, res) {
 		order = req.query.order === 'asc' ? 'ASC' : 'DESC',
 		limit = parseInt(req.query.limit) || 10;
 
-	var q = 'SELECT * FROM ?? WHERE country = \'United States\' ORDER BY ?? '+order+' LIMIT ?',
-		args = [cfg.table, sort, limit];
+	var q = 'SELECT * FROM ?? WHERE country = \'United States\' AND ?? IS NOT NULL ORDER BY ?? '+order+' LIMIT ?',
+		args = [cfg.table, sort, sort, limit];
 
 	console.log(q, args);
 

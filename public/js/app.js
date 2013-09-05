@@ -43,9 +43,8 @@ children.list.model.set({
 		{"name":"region","label":"Region"},
 		{"name":"district","label":"District"},
 
-		{"name":"area","label":"Area"},
+		{"name":"areaTotal","label":"Area"},
 		{"name":"areaLand","label":"Area Land"},
-		{"name":"areaTotal","label":"Area Total"},
 		{"name":"areaWater","label":"Area Water"},
 
 		{"name":"elevation","label":"Elevation"}
@@ -76,7 +75,7 @@ var presets = [
 	    color: '#4C9BD4',
 	    label: 'Largest cities',
 	    cities: ['cityname','cityname','cityname','cityname','cityname'],
-	    preset: 'area,valueDesc'
+	    preset: 'areaTotal,valueDesc'
 	  },
 	  {
 	    color: '#7EC245',
@@ -88,7 +87,7 @@ var presets = [
 	    color: '#DF5893',
 	    label: 'Smallest cities',
 	    cities: ['cityname','cityname','cityname','cityname','cityname'],
-	    preset: 'area,valueAsc'
+	    preset: 'areaTotal,valueAsc'
 	  }
 ];
 
@@ -172,6 +171,15 @@ children.list.on('go', function(val) {
 	
 	show('cityinput', 'detail');
 });
+
+children.cityinput.on('compare', function(val) {
+	console.log(val);
+	children.cityinput.model.set('cities', val);
+	children.comparison.render();
+	
+	show('cityinput', 'comparison');
+});
+
 
 $('h1').click(function() {
 	show('main');
