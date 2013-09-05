@@ -8,14 +8,31 @@ from glob import glob
 DATA_DIR = "data"
 CRIME_DATA_NAMING = "offenses_known_to_law_enforcement_by_state_by_city_*.csv"
 CRIME_DATA_OUT_NAME = "crime.pck"
+CRIME_TITLE_REPLACEMENTS = {
+    "State" : "state",
+    "City" : "city",
+    "Violent crime" : "violentCrime",
+    "Murder and nonnegligent manslaughter" : "murderManslaughter",
+    "Forcible rape" : "forcibleRape",
+    "Robbery" : "robbery",
+    "Aggravated assault" : "aggravatedAssault",
+    "Property crime" : "propertyCrime",
+    "Burglary" : "burglary",
+    "Larceny-theft" : "larcenyTheft",
+    "Motor vehicle theft" : "motorTheft",
+    "Arson" : "arson", "Arson1" : "arson"
+}
 
 POLICE_DATA_NAMING = "law_enforcement_employees_by_state_by_city_*.csv"
 POLICE_DATA_OUT_NAME = "police.pck"
-POLICE_TITLE_REPLACEMENTS = [
-    ("Total law enforcement employees", "Law Enforcement Employees"),
-    ("Total officers", "Officers"),
-    ("Total civilians", "Civilians")
-]
+POLICE_TITLE_REPLACEMENTS = {
+    "State" : "state",
+    "City" : "city",
+    "Total law enforcement employees" : "lawEnforcementEmployees",
+    "Total officers" : "officers",
+    "Total civilians" : "civilians",
+    "Population" : "population"
+}
 
 def flushPrint(message):
     print message
@@ -40,7 +57,7 @@ def translateTitles(titles, titleReplace=None):
     
     for t in titles:
         if t:
-            t = t.replace("\n", " ")
+            t = t.replace("\n", " ").replace("- ", "-").replace("  ", " ")
         if t in titleReplace:
             t = titleReplace[t]
         titlesOut.append(t)
@@ -64,7 +81,7 @@ def extractSingleCSV(csvdata, titleReplace=None):
         elif rnum == 2:
             year = row[0].split()[-1]
         elif rnum == 3:
-            titles = translateTitles(row)
+            titles = translateTitles(row, titleReplace)
         else:
             # Capture state from previous entry if absent
             if not row[0]:
@@ -102,7 +119,7 @@ def saveDataDump(fname, data):
         pickle.dump(data, pfile)
 
 if __name__ == "__main__":
-    data = extractData(os.path.join(DATA_DIR, CRIME_DATA_NAMING))
+    data = extractData(os.path.join(DATA_DIR, CRIME_DATA_NAMING), CRIME_TITLE_REPLACEMENTS)
     saveDataDump(os.path.join(DATA_DIR, CRIME_DATA_OUT_NAME), data)
     data = extractData(os.path.join(DATA_DIR, POLICE_DATA_NAMING), POLICE_TITLE_REPLACEMENTS)
     saveDataDump(os.path.join(DATA_DIR, POLICE_DATA_OUT_NAME), data)

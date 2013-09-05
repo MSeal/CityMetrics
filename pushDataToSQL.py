@@ -29,6 +29,14 @@ WIKI_STAT_NO_DUP = set(["areaLand", "areaTotal", "areaWater", "country", "distri
                         "governmentType", "homepage", "latitude", "leaderTitle", "longitude", 
                         "name", "population", "populationDensity", "populationMetro", "region", "state", "type"])
 WIKI_STAT_DUP = set([k for k in WIKI_TYPE.keys() if k not in WIKI_STAT_NO_DUP])
+WIKI_POPULATION_FIXES = { "Nantong" : 7282835, "Durg" : 281436, "Johnstown,_Colorado" : 9887, "Milliken,_Colorado" : 6159 }
+WIKI_NAME_RESOURCE_MATCHES = set(["250px", "220px", "765 hwy 367 judsonia arkansas"])
+WIKI_STATE_FIXES = { "Arkansas LMA" : "Arkansas", "Arkansas-" : "Arkansas", "Georgia WAH-LEH-SKA" : "Georgia", 
+                     "ia" : "Iowa", "Iowa home of RYAN LOVIN" : "Iowa", "Kentucky home of \\\"The Simpsons\\\"" : "Kentucky",
+                     "Minnesota!!!!" : "Minnesota", "MN" : "Minnesota", "New York (town)" : "New York", "NY" : "New York",
+                     "Nuwi ta" : "Oklahoma",  "OK" : "Oklahoma", "Texas aka \\\"WHIRLWIND COUNTRY\\\"" : "Texas",
+                     "Texas." : "Texas", "Tx" : "Texas", "Utahh" : "Utah", "Washington USA" : "Washington",
+                     "which means Golden Rivers in the Creek Indian language." : "Georgia", "Ok" : "Oklahoma" }
 WIKI_PRIMARY_TABLE = "cityPrimaryStats"
 CRIME_TABLE = "cityCrime"
 POLICE_TABLE = "cityPolice"
@@ -49,7 +57,7 @@ def createDB(cur):
     cur.execute("CREATE DATABASE `metrics`;")
     cur.execute("USE `metrics`;")
 
-def createTables(cur):
+def createWikiTables(cur):
     cur.execute("DROP TABLE IF EXISTS `%s`;" % WIKI_PRIMARY_TABLE)
     wikiItems = extractNoDupStats(WIKI_TYPE).items()
     wikiItems.sort(key=lambda kv: kv[0])
@@ -61,24 +69,24 @@ def createTables(cur):
         cur.execute("DROP TABLE IF EXISTS `%s`;" % tableName)
         cur.execute("CREATE TABLE `%s` (cityId INT NOT NULL, %s %s) ENGINE=InnoDB DEFAULT CHARSET=utf8;" % 
             (tableName, duplicate, WIKI_TYPE[duplicate]))
-        cur.execute("CREATE INDEX `%s` ON `%s` (cityId);" % ("cityId"+duplicate, tableName))
+        cur.execute("CREATE INDEX `%s` ON `%s` (cityId);" % ("cityId"+tableNameFromKey(duplicate), tableName))
 
-def cleanSQLValue(value, quoteChar="'"):
-    if value == None:
-        return None#"NULL"
-    # if isinstance(value, basestring):
-    #     return "%s%s%s" % (quoteChar, value.replace(quoteChar, "\\"+quoteChar), quoteChar)
+def cleanSQLValue(value, quoteChar=None, zeroValid=False):
+    if value == None or value == "" or (not zeroValid and (value == 0 or value == "0")):
+        return None
+    if quoteChar and isinstance(value, basestring):
+        return "%s%s%s" % (quoteChar, value.replace(quoteChar, "\\"+quoteChar), quoteChar)
     return value
 
-def cleanSQLValuesList(elems, quoteChar="'"):
-    return [cleanSQLValue(e, quoteChar) for e in elems]
+def cleanSQLValuesList(elems, quoteChar=None, zeroValid=False):
+    return [cleanSQLValue(e, quoteChar, zeroValid) for e in elems]
 
-def buildPrimaryValues(stats, columns, id, idName="id"):
+def buildPrimaryValues(stats, columns, zeroValid=False):
     colmap = { col : i for i,col in enumerate(columns) }
     entries = [None] * len(columns)
-    for col, value in [(idName, id)] + stats:
+    for col, value in stats:
         entries[colmap[col]] = value
-    return cleanSQLValuesList(entries)
+    return cleanSQLValuesList(entries, zeroValid=zeroValid)
 
 def buildDupValues(stat, values, id):
     vstrs = []
@@ -102,14 +110,14 @@ def insertWikiData(db, cur, wiki):
 
     insertData = resetInserts()
     for count, (resource, stats) in enumerate(wiki.iteritems()):
-        insertData[WIKI_PRIMARY_TABLE].append(buildPrimaryValues(extractNoDupStats(stats).items(), 
-                                                                 columnByName[WIKI_PRIMARY_TABLE],
-                                                                 count))
+        id = count+1
+        insertData[WIKI_PRIMARY_TABLE].append(buildPrimaryValues(extractNoDupStats(stats).items() + [("id", id)], 
+                                                                 columnByName[WIKI_PRIMARY_TABLE]))
         for dup, dupValues in extractDupStats(stats).items():
-            insertData[tableNameFromKey(dup)].extend(buildDupValues(dup, dupValues, count))
+            insertData[tableNameFromKey(dup)].extend(buildDupValues(dup, dupValues, id))
 
         # Add ID tracker to data
-        stats["id"] = count
+        stats["id"] = id
 
         if (count > 0 and count % SQL_BLOCK_SIZE == 0) or count == len(wiki)-1:
             print "Pushing %d rows into DB" % (SQL_BLOCK_SIZE if count % SQL_BLOCK_SIZE == 0 else count % SQL_BLOCK_SIZE)
@@ -126,25 +134,36 @@ def insertWikiData(db, cur, wiki):
 def buildWikiStateCityMap(wiki):
     wikimap = {}
     for resource, stats in wiki.iteritems():
-        if "country" in stats and stats["country"] == "United States" and "state" in stats and "city" in stats:
-            wikimap[(stats["state"], stats["city"])] = stats
+        #print "country" in stats, "country" in stats and stats["country"] == "United States", "state" in stats, "name" in stats
+        if "country" in stats and stats["country"] == "United States" and "state" in stats and "name" in stats:
+            wikimap[(stats["state"], stats["name"])] = stats
     return wikimap
 
-def insertFBIData(db, cur, data, wiki, tableName):
+def insertFBIData(db, cur, data, wiki, tableName, includeCols=None):
     wikimap = buildWikiStateCityMap(wiki)
     columns = []
-    
 
     for year in data:
+        print "Pushing %s data into %s" % (year, tableName)
         for state in data[year]:
             insertData = []
             for count, (city, stats) in enumerate(data[year][state].iteritems()):
                 if not columns:
                     columns = stats.keys()
+                    if includeCols:
+                        columns.extend(includeCols)
                     columns.sort()
-                    columns = ["cityId"] + columns
-                id = wikimap[(state, city)] if (state, city) in wikimap else None
-                insertData.append(buildPrimaryValues(stats.items(), columns, id, "cityId"))
+                    columns = ["cityId", "year"] + columns
+                    cur.execute("DROP TABLE IF EXISTS `%s`;" % tableName)
+                    cur.execute("CREATE TABLE `" + tableName + "` (`id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT, " + 
+                        ", ".join(["`"+c+"` INT" for c in columns]) + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+                    cur.execute("CREATE INDEX `%s` ON `%s` (cityId);" % 
+                        ("cityId"+tableNameFromKey(tableName), tableName))
+
+                #print (state, city)
+                cityId = wikimap[(state, city)]["id"] if (state, city) in wikimap else ""
+                insertData.append(buildPrimaryValues(stats.items() + 
+                    [("year", str(year)), ("cityId", str(cityId))], columns, zeroValid=True))
                 if count == len(data[year][state])-1:
                     cur.executemany(("INSERT INTO `%s` (%s) VALUES (" % 
                         (tableName, ", ".join(cleanSQLValuesList(columns, "`")))) + 
@@ -261,14 +280,17 @@ def squashStats(stats):
 
 def cleanResource(resource, stats):
     stats = squashStats(removeUnderscores(dropUnitsAndLanguage(stats)))
-    if "country" in stats and stats["country"] == "United States":
-        if "name" not in stats:
-            stats["name"] = ""
-        if "," in stats["name"]:
-            city, state = stats["name"].split(",", 1)
-            stats["name"] = city.strip()
-            if "state" not in stats:
-                stats["state"] = state.strip()
+    if "name" not in stats:
+        stats["name"] = ""
+    if "," in stats["name"]:
+        city, state = stats["name"].split(",")[:2]
+        stats["name"] = city.strip()
+        if "state" not in stats:
+            stats["state"] = state.strip()
+    elif "," in resource:
+        if "state" not in stats:
+            city, state = resource.replace("_", " ").split(",")[:2]
+            stats["state"] = state.strip()
     if "areaCode" in stats:
         expCodes = set([])
         for code in stats["areaCode"]:
@@ -290,6 +312,12 @@ def cleanResource(resource, stats):
         else:
             cleanval = value if value else None
         stats[stat] = cleanval
+    if resource in WIKI_POPULATION_FIXES:
+        stats["population"] = WIKI_POPULATION_FIXES[resource]
+    if "name" in stats and stats["name"] in WIKI_NAME_RESOURCE_MATCHES:
+        stats["name"] = resource.replace("_", " ")
+    if "state" in stats and stats["state"] in WIKI_STATE_FIXES:
+        stats["state"] = WIKI_STATE_FIXES[stats["state"]]
     return resource, stats
 
 def appendColumnCount(count, newcol):
@@ -327,6 +355,7 @@ def cleanWikiData(wiki):
 if __name__ == "__main__":
     host = "127.0.0.1"
     user = "root"
+    password = "toor"
     #db = "metrics"
 
     wiki = loadWikipediaData()
@@ -339,13 +368,13 @@ if __name__ == "__main__":
 
     con = None
     try:
-        con = sql.connect(host=host, user=user, passwd="toor")
+        con = sql.connect(host=host, user=user, passwd=password)
         cur = con.cursor()
         createDB(cur)
-        createTables(cur)
+        createWikiTables(cur)
         insertWikiData(con, cur, wiki)
-        # insertFBIData(con, cur, crime, wiki, CRIME_TABLE)
-        # insertFBIData(con, cur, police, wiki, POLICE_TABLE)
+        insertFBIData(con, cur, crime, wiki, CRIME_TABLE)
+        insertFBIData(con, cur, police, wiki, POLICE_TABLE, ["population"])
     except sql.Error, e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit(1)

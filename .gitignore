@@ -39,3 +39,7 @@ nosetests.xml
 # Data dumps
 mappingbased_properties*
 data/archive
+
+# Node
+node_modules
+npm-debug.log
