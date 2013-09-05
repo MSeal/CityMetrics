@@ -13,23 +13,25 @@ STR_TYPE = "VARCHAR(255)"
 DESCRIPTION_TYPE = "TEXT"
 INT_TYPE = "INT"
 FLOAT_TYPE = "DOUBLE"
+DATE_TYPE = "DATE"
 
 WIKI_STAT_RENAME = {"wgs84_pos#lat": "latitude", "wgs84_pos#long": "longitude", "populationTotal": "population",
                     "mayor" : "leaderName", "leader" : "leaderName", "populationUrban" : "populationMetro",
                     "nick" : "nickname", "isPartOf" : "parentGroup" }
-WIKI_TYPE = { "area" : FLOAT_TYPE, "areaCode" : INT_TYPE, "areaLand" : FLOAT_TYPE, "areaTotal" : FLOAT_TYPE, 
-              "areaWater" : FLOAT_TYPE, "country" : STR_TYPE, "daylightSavingTimeZone" : STR_TYPE, 
-              "district" : STR_TYPE, "elevation" : FLOAT_TYPE, "foundingDate" : STR_TYPE, "governmentType" : STR_TYPE,
-              "homepage" : STR_TYPE, "latitude" : FLOAT_TYPE, "leaderName" : STR_TYPE, "leaderTitle" : STR_TYPE, 
-              "longitude" : FLOAT_TYPE, "motto" : DESCRIPTION_TYPE, "name" : STR_TYPE,
-              "nickname" : STR_TYPE, "parentGroup" : STR_TYPE, "population" : INT_TYPE, "populationDensity" : FLOAT_TYPE, 
-              "populationMetro" : STR_TYPE, "postalCode" : STR_TYPE, "region" : STR_TYPE, "state" : STR_TYPE,
-              "timeZone" : STR_TYPE, "type" : STR_TYPE, "utcOffset" : STR_TYPE }
-WIKI_STAT_NO_DUP = set(["area", "areaLand", "areaTotal", "areaWater", "country", "district", "elevation", 
-                        "foundingDate", "governmentType", "homepage", "latitude", "leaderTitle", "longitude", 
+WIKI_TYPE = { "areaCode" : INT_TYPE, "areaLand" : FLOAT_TYPE, "areaTotal" : FLOAT_TYPE, "areaWater" : FLOAT_TYPE, 
+              "country" : STR_TYPE, "daylightSavingTimeZone" : STR_TYPE, "district" : STR_TYPE, "elevation" : FLOAT_TYPE, 
+              "foundingDate" : DATE_TYPE, "governmentType" : STR_TYPE, "homepage" : STR_TYPE, "latitude" : FLOAT_TYPE, 
+              "leaderName" : STR_TYPE, "leaderTitle" : STR_TYPE, "longitude" : FLOAT_TYPE, "motto" : DESCRIPTION_TYPE, 
+              "name" : STR_TYPE, "nickname" : STR_TYPE, "parentGroup" : STR_TYPE, "population" : INT_TYPE, 
+              "populationDensity" : FLOAT_TYPE, "populationMetro" : STR_TYPE, "postalCode" : STR_TYPE, "region" : STR_TYPE, 
+              "state" : STR_TYPE, "timeZone" : STR_TYPE, "type" : STR_TYPE, "utcOffset" : STR_TYPE }
+WIKI_STAT_NO_DUP = set(["areaLand", "areaTotal", "areaWater", "country", "district", "elevation", "foundingDate", 
+                        "governmentType", "homepage", "latitude", "leaderTitle", "longitude", 
                         "name", "population", "populationDensity", "populationMetro", "region", "state", "type"])
 WIKI_STAT_DUP = set([k for k in WIKI_TYPE.keys() if k not in WIKI_STAT_NO_DUP])
 WIKI_PRIMARY_TABLE = "cityPrimaryStats"
+CRIME_TABLE = "cityCrime"
+POLICE_TABLE = "cityPolice"
 
 SQL_BLOCK_SIZE = 1000
 
@@ -59,10 +61,11 @@ def createTables(cur):
         cur.execute("DROP TABLE IF EXISTS `%s`;" % tableName)
         cur.execute("CREATE TABLE `%s` (cityId INT NOT NULL, %s %s) ENGINE=InnoDB DEFAULT CHARSET=utf8;" % 
             (tableName, duplicate, WIKI_TYPE[duplicate]))
+        cur.execute("CREATE INDEX `%s` ON `%s` (cityId);" % ("cityId"+duplicate, tableName))
 
 def cleanSQLValue(value, quoteChar="'"):
     if value == None:
-        return "NULL"
+        return None#"NULL"
     # if isinstance(value, basestring):
     #     return "%s%s%s" % (quoteChar, value.replace(quoteChar, "\\"+quoteChar), quoteChar)
     return value
@@ -70,10 +73,10 @@ def cleanSQLValue(value, quoteChar="'"):
 def cleanSQLValuesList(elems, quoteChar="'"):
     return [cleanSQLValue(e, quoteChar) for e in elems]
 
-def buildPrimaryValues(stats, columns, id):
+def buildPrimaryValues(stats, columns, id, idName="id"):
     colmap = { col : i for i,col in enumerate(columns) }
     entries = [None] * len(columns)
-    for col, value in [("id", id)] + stats:
+    for col, value in [(idName, id)] + stats:
         entries[colmap[col]] = value
     return cleanSQLValuesList(entries)
 
@@ -105,6 +108,9 @@ def insertWikiData(db, cur, wiki):
         for dup, dupValues in extractDupStats(stats).items():
             insertData[tableNameFromKey(dup)].extend(buildDupValues(dup, dupValues, count))
 
+        # Add ID tracker to data
+        stats["id"] = count
+
         if (count > 0 and count % SQL_BLOCK_SIZE == 0) or count == len(wiki)-1:
             print "Pushing %d rows into DB" % (SQL_BLOCK_SIZE if count % SQL_BLOCK_SIZE == 0 else count % SQL_BLOCK_SIZE)
             for tableName, values in insertData.iteritems():
@@ -117,6 +123,35 @@ def insertWikiData(db, cur, wiki):
                 db.commit()
             insertData = resetInserts()
 
+def buildWikiStateCityMap(wiki):
+    wikimap = {}
+    for resource, stats in wiki.iteritems():
+        if "country" in stats and stats["country"] == "United States" and "state" in stats and "city" in stats:
+            wikimap[(stats["state"], stats["city"])] = stats
+    return wikimap
+
+def insertFBIData(db, cur, data, wiki, tableName):
+    wikimap = buildWikiStateCityMap(wiki)
+    columns = []
+    
+
+    for year in data:
+        for state in data[year]:
+            insertData = []
+            for count, (city, stats) in enumerate(data[year][state].iteritems()):
+                if not columns:
+                    columns = stats.keys()
+                    columns.sort()
+                    columns = ["cityId"] + columns
+                id = wikimap[(state, city)] if (state, city) in wikimap else None
+                insertData.append(buildPrimaryValues(stats.items(), columns, id, "cityId"))
+                if count == len(data[year][state])-1:
+                    cur.executemany(("INSERT INTO `%s` (%s) VALUES (" % 
+                        (tableName, ", ".join(cleanSQLValuesList(columns, "`")))) + 
+                        ",".join(["%s"]*len(columns)) + ");", insertData)
+                    db.commit()
+
+
 def loadWikipediaData():
     with open(os.path.join(DATA_DIR, WIKI_DATA_DUMP), "rb") as dfile:
         return pickle.load(dfile)
@@ -128,37 +163,6 @@ def loadCrimeData():
 def loadPoliceData():
     with open(os.path.join(DATA_DIR, POLICE_DATA_DUMP), "rb") as dfile:
         return pickle.load(dfile)
-
-def joinCrimePoliceData(crime, police):
-    '''
-    Performs a full-outer join with crime and police
-    '''
-    data = {}
-    for year in crime:
-        if year not in data:
-            data[year] = {}
-        for state in crime[year]:
-            if state not in data[year]:
-                data[year][state] = {}
-            if state not in police:
-                police[year][state] = {}
-            for city in crime[year][state]:
-                if city in police[year][state]:
-                    data[year][state][city] = dict(
-                        crime[year][state][city].items() + police[year][state][city].items())
-                else:
-                    data[year][state][city] = crime[year][state][city]
-                    #print "MISSING POLICE", year, state, city
-        for state in police[year]:
-            if state not in data[year]:
-                data[year][state] = {}
-            if state not in crime:
-                crime[year][state] = {}
-            for city in police[year][state]:
-                if city not in crime[year][state]:
-                    data[year][state][city] = police[year][state][city]
-                    #print "MISSING CRIME", year, state, city
-    return data
 
 def generateStateCityMap(cpdata):
     stateCityMap = {}
@@ -271,6 +275,21 @@ def cleanResource(resource, stats):
             for intCode in re.findall(r"[0-9]+", str(code)):
                 expCodes.add(int(intCode))
         stats["areaCode"] = expCodes
+    if "postalCode" in stats:
+        expCodes = set([])
+        for code in stats["postalCode"]:
+            if isinstance(code, basestring) and ("*" in code or "/" in code or "," in code):
+                for intCode in re.findall(r"[0-9]+", str(code)):
+                    expCodes.add(int(intCode))
+            else:
+                expCodes.add(code)
+        stats["postalCode"] = expCodes
+    for stat, value in stats.items():
+        if isinstance(value, set):
+            cleanval = set([v for v in value if v])
+        else:
+            cleanval = value if value else None
+        stats[stat] = cleanval
     return resource, stats
 
 def appendColumnCount(count, newcol):
@@ -279,13 +298,13 @@ def appendColumnCount(count, newcol):
             count[col] = 0
         count[col] += 1
 
-def countColumns(cpdata, wiki):
+def countColumns(crime, wiki):
     allcolumns = {}
     uscolumns = {}
     mappedCount = 0
     unmappedCount = 0
     
-    cpmap = generateStateCityMap(cpdata)
+    cpmap = generateStateCityMap(crime)
     for resource, stats in wiki.iteritems():
         resource, stats = cleanResource(resource, stats)
         appendColumnCount(allcolumns, stats)
@@ -313,14 +332,10 @@ if __name__ == "__main__":
     wiki = loadWikipediaData()
     crime = loadCrimeData()
     police = loadPoliceData()
-    cpdata = joinCrimePoliceData(crime, police)
-    # For stat generation
-    #countColumns(cpdata, wiki)
-    wiki = cleanWikiData(wiki)
 
-    # for k,v in WIKI_TYPE.items():
-    #     if k not in WIKI_STAT_NO_DUP:
-    #         print k,v
+    # For stat generation
+    #countColumns(crime, wiki)
+    wiki = cleanWikiData(wiki)
 
     con = None
     try:
@@ -329,7 +344,8 @@ if __name__ == "__main__":
         createDB(cur)
         createTables(cur)
         insertWikiData(con, cur, wiki)
-
+        # insertFBIData(con, cur, crime, wiki, CRIME_TABLE)
+        # insertFBIData(con, cur, police, wiki, POLICE_TABLE)
     except sql.Error, e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit(1)
