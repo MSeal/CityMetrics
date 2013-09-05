@@ -121,11 +121,56 @@ children.main.model.set({
 });
 
 
+var metrics = [
+	//{"name":"type","label":"type"},
+
+	{"name":"population","label":"Population"},
+	{"name":"populationMetro","label":"Population Metro"},
+	{"name":"populationDensity","label":"Population Density"},
+	
+	{"name":"country","label":"Country"},
+	{"name":"state","label":"State"},
+	{"name":"region","label":"Region"},
+	{"name":"district","label":"District"},
+
+	{"name":"areaTotal","label":"Area"},
+	{"name":"areaLand","label":"Area Land"},
+	{"name":"areaWater","label":"Area Water"},
+
+	{"name":"elevation","label":"Elevation"}
+
+	//{"name":"latitude","label":"Latitude"},
+	//{"name":"longitude","label":"Longitude"},
+
+	//{"name":"foundingDate","label":"foundingDate"},
+	//{"name":"governmentType","label":"governmentType"},
+	//{"name":"leaderTitle","label":"leaderTitle"},
+	//{"name":"name","label":"name"},
+	//{"name":"homepage","label":"homepage"},
+	
+];
 
 children.cityinput.model.on('change:cities', function() {
-	children.detail.model.set('cities', children.cityinput.model.get('cities'));
-	children.comparison.model.set('cities', children.comparison.model.get('cities'));
+	var cities = children.cityinput.model.get('cities');
+
+	children.detail.model.set('cities', cities);
+	children.comparison.model.set('cities', cities);
+
+	api('compare', {cities: cities}, function(err, data) {
+		var out = [];
+		for (var i = 0; i < metrics.length; i+=1) {
+			var row = [];
+			for (var j = 0; j < data.length; j+=1) {
+				row.push({name: utils.createCityLabel(data[j]), value: data[j][metrics[i].name]});
+			}
+			out.push({metric: metrics[i], data: row});
+		}
+
+		children.comparison.model.set('data', out);
+		
+	});
 });
+
 
 children.list.model.on('change', function(model) {
 	if ('order' in model.changed || 'sort' in model.changed) {
@@ -160,6 +205,14 @@ children.main.on('compare', function(val) {
 	show('cityinput', 'comparison');
 });
 
+children.cityinput.on('compare', function(val) {
+	console.log(val);
+	children.cityinput.model.set('cities', val);
+	children.comparison.render();
+	
+	show('cityinput', 'comparison');
+});
+
 children.main.on('preset', function(val) {
 	children.list.model.set(val);
 	
@@ -172,13 +225,7 @@ children.list.on('go', function(val) {
 	show('cityinput', 'detail');
 });
 
-children.cityinput.on('compare', function(val) {
-	console.log(val);
-	children.cityinput.model.set('cities', val);
-	children.comparison.render();
-	
-	show('cityinput', 'comparison');
-});
+
 
 
 $('h1').click(function() {
@@ -186,7 +233,8 @@ $('h1').click(function() {
 });
 
 
-children.cityinput.model.set('cities', []);
+children.comparison.model.set('data', []);
+children.cityinput.model.set({'cities': []});
 children.list.model.set('values', []);
 
 api('stats', {}, function(err, data) {

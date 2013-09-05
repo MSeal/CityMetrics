@@ -67,9 +67,58 @@ app.get('/api/stats', function(req, res) {
 	});
 });
 
+function createCityWhere(input) {
+	var parts = input.split(',').map(function(x) { return x.replace(/^\s+|\s+$/g, '')}).filter(function(x) {return x});
+
+	var q = '(name COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[0]+'%');
+
+	if (parts.length === 2) {
+		q += ' AND (state COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[1]+'%')+' OR country COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[1]+'%')+')';
+	} else if (parts.length === 3) {
+		q += ' AND state COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[1]+'%')+' AND country COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[2]+'%');
+	}
+
+	q += ')';
+
+	return q;
+}
+
+// list cities for autocomplete
+app.get('/api/autocomplete', function(req, res) {
+	var input = req.query.term.toLowerCase(),
+		limit = parseInt(req.query.limit) || 20;
+
+	var q = 'SELECT * FROM ?? WHERE '+createCityWhere(input)+' LIMIT ?',
+		args = [cfg.table, limit];
+
+	console.log(q, args);
+
+	connection.query(q, args,
+		function(err, results) {
+			res.send(results.map(function(x) {
+		        var label = [x.name],
+		            place = x.state ? x.state : x.country;
+		        if (place) {
+		          label.push(place);
+		        }
+		        return label.join(', ');
+		      }));
+	});
+});
+
 // list metrics for specified cities
 app.get('/api/compare', function(req, res) {
+	var cities = req.query.cities,
+		limit = parseInt(req.query.limit) || 50,
+		q = 'SELECT * FROM ?? WHERE '+cities.map(createCityWhere).join(' OR ')+' LIMIT ?',
+		args = [cfg.table, limit];
 
+	console.log(q, args);
+
+	connection.query(q, args,
+		function(err, results) {
+			res.send(results);
+	});
 });
 
 // list metrics for specified cities

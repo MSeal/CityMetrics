@@ -8,6 +8,9 @@ var CityinputView = BaseView.extend({
     	'click .go': 'onGo',
 		'click .random': 'onRandom'
     },
+    onRender: function() {
+    	utils.createAutocomplete(this.$el.find('input'));
+    },
     onInputRemove: function(ev) {
     	if (this.$el.find('input').length > 1) {
     		$(ev.target).parents('.cinput').remove();
@@ -22,11 +25,12 @@ var CityinputView = BaseView.extend({
     		var cinput = input.parents('.cinput'),
     			clone = cinput.clone();
     		clone.find('input').val('');
+    		utils.createAutocomplete(clone.find('input'));
     		cinput.after(clone);
     	}
     },
     onGo: function() {
-		var vals = this.$el.find('input').map(function() {return $(this).val()}).filter(function(x) {return x});
+		var vals = this.$el.find('input').map(function() {return $(this).val()}).toArray().filter(function(x) {return x});
 		this.trigger('compare', vals);
 	},
 	onRandom: function() {
@@ -37,5 +41,5 @@ var CityinputView = BaseView.extend({
 			this.onGo();
 			ev.preventDefault();
 		}
-	},
+	}
 });

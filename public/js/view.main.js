@@ -41,7 +41,10 @@ var MainView = BaseView.extend({
     val = val.split(/ *, *| * vs. */g);
     this.trigger('compare', val);
   },
-	onRender: drawMap
+	onRender: function() {
+    drawMap();
+    utils.createAutocomplete(this.$el.find('.city-inputs input'));
+  }
 });
 
 function drawMap() {
