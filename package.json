@@ -15,10 +15,8 @@
     "type": "git",
     "url": "git://github.com/MSeal/CityMetrics.git"
   },
-  "contributors": [
-    {"name": "Matthew Seal"},
-    {"name": "Jakub Dundalek"},
-  ],
+  "author": {"name": "Matthew Seal"},
+  "contributors": {"name": "Jakub Dundalek"},
   "readmeFilename": "README.md",
   "bugs": {
     "url": "https://github.com/MSeal/CityMetrics/issues"
