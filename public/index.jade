@@ -1,0 +1,68 @@
+html(lang="en")
+  head
+    title CityMetrics
+    link(href='http://fonts.googleapis.com/css?family=Russo+One',rel='stylesheet',type='text/css')
+    link(rel='stylesheet',href='vendor/bootstrap-flatly.css')
+    link(rel='stylesheet',href='vendor/nv.d3.css')
+    link(rel='stylesheet',href='style.css')
+    
+    script#template-main(type='text/html')
+      include templates/main
+
+    script#template-detail(type='text/html')
+      include templates/detail
+
+    script#template-comparison(type='text/html')
+      include templates/comparison
+
+    script#template-list(type='text/html')
+      include templates/list
+
+    script#template-cityinput(type='text/html')
+      include templates/cityinput
+  body
+    h1
+      span.city City
+      span.metrics Metrics
+    p.headline Compare cities, see which one is the best for living or business
+
+    #cityinput
+
+    #main
+
+    #detail
+
+    #comparison
+
+    #list
+
+    //div
+      .bar(style='background: #1FB673') &nbsp;
+      .bar(style='background: #8CC63E') &nbsp;
+      .bar(style='background: #0071BD') &nbsp;
+      .bar(style='background: #47BCFF') &nbsp;
+      .bar(style='background: #772B8F') &nbsp;
+      .bar(style='background: #DF5893') &nbsp;
+
+      p
+
+      .bar(style='background: #149C49') &nbsp;
+      .bar(style='background: #7EC245') &nbsp;
+      .bar(style='background: #1566AB') &nbsp;
+      .bar(style='background: #4C9BD4') &nbsp;
+      .bar(style='background: #82BAE5') &nbsp;
+      .bar(style='background: #93278F') &nbsp;
+      .bar(style='background: #C877B1') &nbsp;
+      .bar(style='background: #881318') &nbsp;
+      .bar(style='background: #F0502B') &nbsp;
+      .bar(style='background: #F7911E') &nbsp;
+
+    script(type='text/javascript',src='bower_components/jquery/jquery.min.js')
+    script(type='text/javascript',src='bower_components/underscore/underscore-min.js')
+    script(type='text/javascript',src='bower_components/backbone/backbone-min.js')
+    script(type='text/javascript',src='vendor/d3.v3.min.js')
+    script(type='text/javascript',src='vendor/topojson.v1.min.js')
+    script(type='text/javascript',src='vendor/nv.d3.min.js')
+
+    each val in 'js/view.base.js js/view.main.js js/view.detail.js js/view.list.js js/view.comparison.js js/view.cityinput.js js/app.js'.split(' ')
+      script(type='text/javascript',src=val)

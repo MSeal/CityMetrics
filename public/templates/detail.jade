@@ -1,0 +1,29 @@
+div
+  .citytitle <%- cities[0] %>
+  table.suggestions
+    tr
+      td(style='color: #888; text-align: right') similar cities
+      td.metricsimilar
+        a(href='#') Houston
+        a(href='#') Denver
+        a(href='#') Sacramento
+        a(href='#') Phoenix
+    tr
+      td(style='color: #888; text-align: right') closest cities
+      td.metricsimilar
+        a(href='#') Miami
+        a(href='#') Detroit
+        a(href='#') Seattle
+  table.metrics
+    tr
+      td.metricname Area
+      td.metricvalue 1531313 sqft
+      td.metricsimilar
+        a(href='#') Houston
+        a(href='#') Denver
+    tr
+      td.metricname Population
+      td.metricvalue 153131
+      td.metricsimilar
+        a(href='#') Dallas
+        a(href='#') Seattle

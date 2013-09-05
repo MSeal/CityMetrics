@@ -1,0 +1,243 @@
+
+body {
+	/*font-family: sans-serif;*/
+	font-size: 13pt;
+	color: #333;
+	margin: 15px;
+	margin-top: 0px;
+}
+
+a,
+a:hover {
+	color: #0E6DCC;
+}
+
+.form-control:focus {
+	border-color: #669CD1;
+}
+
+#main {
+	width: 800;
+	margin: 0 auto;
+}
+
+h1 {
+	/*font-style: italic;*/
+	font-size: 80px;
+	/*font-weight: bold;*/
+	font-family: 'Russo One', sans-serif;
+	text-align: center;
+	margin-bottom: 0px;
+	margin-top: 10px;
+}
+
+h1 {
+	cursor: pointer;
+}
+
+h1 .city {
+	color: #818181;
+}
+
+h1 .metrics {
+	color: #357EBD;
+}
+
+.headline {
+	text-align: center;
+	font-style: italic;
+}
+
+
+.background {
+  fill: none;
+  pointer-events: all;
+}
+
+#states {
+  fill: #aaa;
+}
+
+#states .active {
+  fill: orange;
+}
+
+#state-borders {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+
+
+.examples {
+	padding-left: 20px;
+}
+
+.examples>* {
+	display: block;
+}
+
+.city-inputs input {
+	width: 300px;
+	display: inline-block;
+}
+
+.city-inputs span {
+	font-size: 16px;
+}
+
+.city-inputs>* {
+	margin: 10px;
+}
+
+.city-inputs .input-append button {
+	position: relative;
+	left: -53px;
+}
+
+.city-inputs .input-append {
+	display: inline-block;
+	margin-right: -40px;
+}
+
+.city-inputs .cinput {
+	display: inline-block;
+}
+
+
+
+
+
+
+.statinfo {
+	display: inline-block;
+	margin-right: 20px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+.statinfo ol {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.statinfo ol a {
+	color: #333;
+}
+
+.statfooter {
+	padding-left: 40px;
+}
+
+.statheader {
+	font-weight: bold;
+	color: #fff;
+	font-size: 20px;
+	padding: 5px 15px;
+	display: inline-block;
+}
+
+a.statheader {
+	color: #fff;
+}
+
+a.statheader:hover {
+	color: #fff;
+	text-decoration: none;
+	opacity: 0.7;
+}
+
+.dbinfo {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.dbheader {
+	font-weight: bold;
+	font-size: 35px;
+	padding: 5px 15px;
+}
+
+.dbval,
+.dbtext {
+	font-weight: bold;
+	padding: 0px 10px;
+}
+
+.dbval {
+	font-size: 30px;
+	text-align: right;
+}
+
+.dbtext {
+	font-size: 20px;
+	text-align: left;
+}
+
+.selectpanel {
+	width: 200px;
+	float: right;
+	margin-top: 30px;
+	clear: both;
+}
+
+.metricheader {
+	display: block;
+	background: #7EC245;
+}
+
+.metricrow {
+	margin-left: 10px;
+	padding: 2px 10px;
+}
+
+.metricrow.active,
+.metricrow:hover {
+	color: #fff;
+	background: #95A5A6;
+	cursor: pointer;
+}
+
+#listchart {
+	width: 600px;
+}
+
+#listchart .nv-y,
+#listchart .nv-x .tick line {
+	display: none;
+}
+
+
+.citytitle {
+	font-size: 50px;
+	margin-top: 30px;
+	margin-left: 80px;
+}
+
+table.metrics td {
+	padding: 10px 20px;
+	font-size: 20px;
+}
+
+table.metrics td a {
+	margin-right: 15px;
+}
+
+table.suggestions {
+	margin-left: 20px;
+	margin-top: 10px;
+	margin-bottom: 20px;
+
+}
+
+table.suggestions td {
+	padding: 2px 6px;
+}
+
+table.suggestions a {
+	margin-right: 10px;
+}

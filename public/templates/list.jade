@@ -1,0 +1,12 @@
+.selectpanel.metric.
+  <div href="#" class="metricheader statheader">Compare</div>
+  <% _.each(metrics, function(val) { %>
+    <div data-value="<%- val.name %>" class="metricrow<%- val.name === sort ? ' active' : ''%>"><%- val.label %></div>
+  <% }) %>
+.selectpanel.sort.
+  <div href="#" class="metricheader statheader">Sort</div>
+  <% _.each(sorts, function(val) { %>
+    <div data-value="<%- val.name %>" class="metricrow<%- val.name === order ? ' active' : ''%>"><%- val.label %></div>
+  <% }) %>
+#listchart
+    svg

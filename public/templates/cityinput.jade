@@ -1,0 +1,18 @@
+mixin cinput
+    .cinput
+        .input-append
+            | <input type="text" value="<%- typeof city !== 'undefined' ? city : '' %>" placeholder="city name" class="form-control"/>
+            button.btn.remove(type='submit')
+                i.glyphicon.glyphicon-remove
+        span vs.
+.city-inputs
+    | <% _.each(cities, function(city) { %>
+    +cinput()
+    | <% }) %>
+    
+    .cinput
+        | <input type="text" value="<%- typeof city !== 'undefined' ? city : '' %>" placeholder="city name" class="form-control"/>
+
+
+    span.btn.btn-default Go
+    span.btn.btn-info Random

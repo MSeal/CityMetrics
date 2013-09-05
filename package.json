@@ -1,0 +1,26 @@
+{
+  "name": "CityMetrics",
+  "version": "0.0.1",
+  "description": "Website for finding similar cities and comparing their various statistics",
+  "main": "server.js",
+  "dependencies": {
+    "express": "~3.3.8",
+    "mysql": "~2.0.0-alpha9"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/MSeal/CityMetrics.git"
+  },
+  "contributors": [
+    {"name": "Matthew Seal"},
+    {"name": "Jakub Dundalek"},
+  ],
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/MSeal/CityMetrics/issues"
+  }
+}

@@ -1,0 +1,43 @@
+div Examples:
+.examples
+  a(href='#') Houston vs. Dallas
+  a(href='#') San Francisco, Portland, Boulder, New York City
+
+br
+
+.city-inputs
+  input.form-control.cityname(type='text',value='',placeholder='Type city name, e.g. Texas')
+  span.btn.btn-default.go Go
+  span.btn.btn-info.random Random
+
+div Select on map
+
+svg#map
+
+table.dbinfo
+  tr
+    th.dbheader(colspan='2') Database
+  tr.dbrow
+    td.dbval <%- stats.cities %>
+    td.dbtext cities
+  tr.dbrow
+    td.dbval <%- stats.countries %>
+    td.dbtext countries
+  tr.dbrow
+    td.dbval <%- stats.metrics %>
+    td.dbtext metrics
+
+div
+
+
+| <% _.each(presets, function(val) { %>
+| <div class="statinfo" data-preset="<%- val.preset %>">
+| <a href="#" style="background: <%- val.color %>" class="preset statheader"><%- val.label %></a>
+ol
+  | <% _.each(val.cities, function(city) { %>
+  li
+    a(href='#') <%- city.name %>
+  | <% }) %>
+.statfooter
+  a.preset(href='#') see more
+| </div><% }) %>

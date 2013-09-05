@@ -1,0 +1,151 @@
+
+<html lang="en">
+  <head>
+    <title>CityMetrics</title>
+    <link href="http://fonts.googleapis.com/css?family=Russo+One" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="vendor/bootstrap-flatly.css"/>
+    <link rel="stylesheet" href="vendor/nv.d3.css"/>
+    <link rel="stylesheet" href="style.css"/>
+    <script id="template-main" type="text/html">
+      <div>Examples:</div>
+      <div class="examples"><a href="#">Houston vs. Dallas</a><a href="#">San Francisco, Portland, Boulder, New York City</a></div><br/>
+      <div class="city-inputs">
+        <input type="text" value="" placeholder="Type city name, e.g. Texas" class="form-control cityname"/><span class="btn btn-default go">Go</span><span class="btn btn-info random">Random</span>
+      </div>
+      <div>Select on map</div>
+      <svg id="map"></svg>
+      <table class="dbinfo">
+        <tr>
+          <th colspan="2" class="dbheader">Database</th>
+        </tr>
+        <tr class="dbrow">
+          <td class="dbval"><%- stats.cities %></td>
+          <td class="dbtext">cities</td>
+        </tr>
+        <tr class="dbrow">
+          <td class="dbval"><%- stats.countries %></td>
+          <td class="dbtext">countries</td>
+        </tr>
+        <tr class="dbrow">
+          <td class="dbval"><%- stats.metrics %></td>
+          <td class="dbtext">metrics</td>
+        </tr>
+      </table>
+      <div></div><% _.each(presets, function(val) { %>
+      <div class="statinfo" data-preset="<%- val.preset %>">
+      <a href="#" style="background: <%- val.color %>" class="preset statheader"><%- val.label %></a>
+      <ol><% _.each(val.cities, function(city) { %>
+        <li><a href="#"><%- city.name %></a></li><% }) %>
+      </ol>
+      <div class="statfooter"><a href="#" class="preset">see more</a></div></div><% }) %>
+    </script>
+    <script id="template-detail" type="text/html">
+      <div>
+        <div class="citytitle"><%- cities[0] %></div>
+        <table class="suggestions">
+          <tr>
+            <td style="color: #888; text-align: right">similar cities</td>
+            <td class="metricsimilar"><a href="#">Houston</a><a href="#">Denver</a><a href="#">Sacramento</a><a href="#">Phoenix</a></td>
+          </tr>
+          <tr>
+            <td style="color: #888; text-align: right">closest cities</td>
+            <td class="metricsimilar"><a href="#">Miami</a><a href="#">Detroit</a><a href="#">Seattle</a></td>
+          </tr>
+        </table>
+        <table class="metrics">
+          <tr>
+            <td class="metricname">Area</td>
+            <td class="metricvalue">1531313 sqft</td>
+            <td class="metricsimilar"><a href="#">Houston</a><a href="#">Denver</a></td>
+          </tr>
+          <tr>
+            <td class="metricname">Population</td>
+            <td class="metricvalue">153131</td>
+            <td class="metricsimilar"><a href="#">Dallas</a><a href="#">Seattle</a></td>
+          </tr>
+        </table>
+      </div>
+    </script>
+    <script id="template-comparison" type="text/html">
+      <div class="citytitle">Texas</div><span>vs.</span>
+      <div class="citytitle">Houston</div><span>vs.</span>
+      <div class="citytitle">Denver</div>
+      <table class="metrics">
+        <tr>
+          <td class="metricname">Area</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td class="metricname">Population</td>
+          <td></td>
+        </tr>
+      </table>
+    </script>
+    <script id="template-list" type="text/html">
+      <div class="selectpanel metric">
+        <div href="#" class="metricheader statheader">Compare</div>
+        <% _.each(metrics, function(val) { %>
+          <div data-value="<%- val.name %>" class="metricrow<%- val.name === sort ? ' active' : ''%>"><%- val.label %></div>
+        <% }) %>
+      </div>
+      <div class="selectpanel sort">
+        <div href="#" class="metricheader statheader">Sort</div>
+        <% _.each(sorts, function(val) { %>
+          <div data-value="<%- val.name %>" class="metricrow<%- val.name === order ? ' active' : ''%>"><%- val.label %></div>
+        <% }) %>
+      </div>
+      <div id="listchart">
+        <svg></svg>
+      </div>
+    </script>
+    <script id="template-cityinput" type="text/html">
+      <div class="city-inputs"><% _.each(cities, function(city) { %>
+              <div class="cinput">
+                <div class="input-append"><input type="text" value="<%- typeof city !== 'undefined' ? city : '' %>" placeholder="city name" class="form-control"/>
+                  <button type="submit" class="btn remove"><i class="glyphicon glyphicon-remove"></i></button>
+                </div><span>vs.</span>
+              </div><% }) %>
+        <div class="cinput"><input type="text" value="<%- typeof city !== 'undefined' ? city : '' %>" placeholder="city name" class="form-control"/></div><span class="btn btn-default">Go</span><span class="btn btn-info">Random</span>
+      </div>
+    </script>
+  </head>
+  <body>
+    <h1><span class="city">City</span><span class="metrics">Metrics</span></h1>
+    <p class="headline">Compare cities, see which one is the best for living or business</p>
+    <div id="cityinput"></div>
+    <div id="main"></div>
+    <div id="detail"></div>
+    <div id="comparison"></div>
+    <div id="list"></div><!--div
+    <div style="background: #1FB673" class="bar">&nbsp;</div>
+    <div style="background: #8CC63E" class="bar">&nbsp;</div>
+    <div style="background: #0071BD" class="bar">&nbsp;</div>
+    <div style="background: #47BCFF" class="bar">&nbsp;</div>
+    <div style="background: #772B8F" class="bar">&nbsp;</div>
+    <div style="background: #DF5893" class="bar">&nbsp;</div>
+    <p></p>
+    <div style="background: #149C49" class="bar">&nbsp;</div>
+    <div style="background: #7EC245" class="bar">&nbsp;</div>
+    <div style="background: #1566AB" class="bar">&nbsp;</div>
+    <div style="background: #4C9BD4" class="bar">&nbsp;</div>
+    <div style="background: #82BAE5" class="bar">&nbsp;</div>
+    <div style="background: #93278F" class="bar">&nbsp;</div>
+    <div style="background: #C877B1" class="bar">&nbsp;</div>
+    <div style="background: #881318" class="bar">&nbsp;</div>
+    <div style="background: #F0502B" class="bar">&nbsp;</div>
+    <div style="background: #F7911E" class="bar">&nbsp;</div>-->
+    <script type="text/javascript" src="bower_components/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="bower_components/underscore/underscore-min.js"></script>
+    <script type="text/javascript" src="bower_components/backbone/backbone-min.js"></script>
+    <script type="text/javascript" src="vendor/d3.v3.min.js"></script>
+    <script type="text/javascript" src="vendor/topojson.v1.min.js"></script>
+    <script type="text/javascript" src="vendor/nv.d3.min.js"></script>
+    <script type="text/javascript" src="js/view.base.js"></script>
+    <script type="text/javascript" src="js/view.main.js"></script>
+    <script type="text/javascript" src="js/view.detail.js"></script>
+    <script type="text/javascript" src="js/view.list.js"></script>
+    <script type="text/javascript" src="js/view.comparison.js"></script>
+    <script type="text/javascript" src="js/view.cityinput.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+  </body>
+</html>

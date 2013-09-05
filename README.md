@@ -10,3 +10,8 @@ Setup
 DataDump
 ===========
 python pushDataToSQL.py
+
+
+Run
+===========
+node server.js
