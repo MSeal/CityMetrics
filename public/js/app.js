@@ -6,17 +6,30 @@ var api = function(uri, args, cb) {
 	});
 };
 
-var views = 'Main Detail List Comparison Cityinput'.split(' ');
+var views = [
+	{"name":"Main", "defaults":{
+		'presets': [],
+		'stats': {
+		  "metrics": '',
+		  "cities": '',
+		  "countries": ''
+		}
+	}},
+	{"name":"Detail", "defaults":{data: []}},
+	{"name":"List", "defaults":{values: []}},
+	{"name":"Comparison", "defaults":{data: []}},
+	{"name":"Cityinput", "defaults":{cities: []}}
+];
 
 var children = {};
 
 views.forEach(function(x) {
-	var view = new window[x+'View']({
-		el: '#'+x.toLowerCase(),
-		model: new Backbone.Model()
+	var view = new window[x.name+'View']({
+		el: '#'+x.name.toLowerCase(),
+		model: new Backbone.Model(x.defaults)
 	});
 	view.$el.hide();
-	children[x.toLowerCase()] = view;
+	children[x.name.toLowerCase()] = view;
 });
 
 function show() {
@@ -111,16 +124,6 @@ presets.forEach(function(x, i) {
 	});
 });
 
-children.main.model.set({
-	'presets': [],
-	'stats': {
-	  "metrics": '',
-	  "cities": '',
-	  "countries": ''
-	}
-});
-
-
 var metrics = [
 	//{"name":"type","label":"type"},
 
@@ -128,10 +131,10 @@ var metrics = [
 	{"name":"populationMetro","label":"Population Metro"},
 	{"name":"populationDensity","label":"Population Density"},
 	
-	{"name":"country","label":"Country"},
-	{"name":"state","label":"State"},
-	{"name":"region","label":"Region"},
-	{"name":"district","label":"District"},
+	//{"name":"country","label":"Country"},
+	//{"name":"state","label":"State"},
+	//{"name":"region","label":"Region"},
+	//{"name":"district","label":"District"},
 
 	{"name":"areaTotal","label":"Area"},
 	{"name":"areaLand","label":"Area Land"},
@@ -157,17 +160,40 @@ children.cityinput.model.on('change:cities', function() {
 	children.comparison.model.set('cities', cities);
 
 	api('compare', {cities: cities}, function(err, data) {
-		var out = [];
-		for (var i = 0; i < metrics.length; i+=1) {
-			var row = [];
-			for (var j = 0; j < data.length; j+=1) {
-				row.push({name: utils.createCityLabel(data[j]), value: data[j][metrics[i].name]});
-			}
-			out.push({metric: metrics[i], data: row});
-		}
+		if (cities.length === 1) {
+			var out = _.map(data[0], function(val, key) {
+				var label = metrics.filter(function(x) {return x.name === key})[0];
+				if (label) {
+					return {
+						label: label.label,
+						value: val,
+						sim: ['Houston', 'Denver']
+					};
+				}
+			}).filter(function(x) {return x});
+			children.detail.model.set({
+				'data': out
+			});
+		} else {
+			var out = [];
+			for (var i = 0; i < metrics.length; i+=1) {
+				var row = [],
+					empty = true;
 
-		children.comparison.model.set('data', out);
-		
+				for (var j = 0; j < data.length; j+=1) {
+					var value = data[j][metrics[i].name];
+					row.push({label: utils.createCityLabel(data[j]), value: value});
+					if (value) {
+						empty = false;
+					}
+				}
+				if (!empty) {
+					out.push({metric: metrics[i], data: row});
+				}
+			}
+
+			children.comparison.model.set('data', out);
+		}
 	});
 });
 
@@ -231,11 +257,6 @@ children.list.on('go', function(val) {
 $('h1').click(function() {
 	show('main');
 });
-
-
-children.comparison.model.set('data', []);
-children.cityinput.model.set({'cities': []});
-children.list.model.set('values', []);
 
 api('stats', {}, function(err, data) {
 	children.main.model.set('stats', data);

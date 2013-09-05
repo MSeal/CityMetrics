@@ -38,7 +38,7 @@ var MainView = BaseView.extend({
   onExample: function(ev) {
     ev.preventDefault();
     var val = $(ev.target).text();
-    val = val.split(/ *, *| * vs. */g);
+    val = val.split(/ *; *| * vs. */g);
     this.trigger('compare', val);
   },
 	onRender: function() {

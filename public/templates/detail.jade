@@ -15,15 +15,13 @@ div
         a(href='#') Detroit
         a(href='#') Seattle
   table.metrics
+    | <% _.each(data, function(val) { %>
     tr
-      td.metricname Area
-      td.metricvalue 1531313 sqft
+      td.metricname <%- val.label %>
+      td.metricvalue <%- val.value %>
       td.metricsimilar
-        a(href='#') Houston
-        a(href='#') Denver
-    tr
-      td.metricname Population
-      td.metricvalue 153131
-      td.metricsimilar
-        a(href='#') Dallas
-        a(href='#') Seattle
+        | <% _.each(val.sim, function(sim) { %>
+        a(href='#') <%- sim %>
+        | <% }) %>
+    | <% }) %>
+    

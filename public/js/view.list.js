@@ -34,7 +34,7 @@ var ListView = BaseView.extend({
 function drawChart(vals) {
 	var self = this;
 
-$('#listchart').height(40*vals[0].values.length);
+$('#listchart').height(30*vals[0].values.length);
 
 nv.addGraph(function() {
      var chart = nv.models.multiBarHorizontalChart()

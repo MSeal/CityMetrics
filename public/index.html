@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css"/>
     <script id="template-main" type="text/html">
       <div>Examples:</div>
-      <div class="examples"><a href="#">Houston vs. Dallas</a><a href="#">San Francisco, Portland, Boulder, New York City</a></div><br/>
+      <div class="examples"><a href="#">Huntsville, Texas vs. City of El Paso, United States</a><a href="#">San Francisco; Portland; Boulder; New York City</a></div><br/>
       <div class="city-inputs">
         <input type="text" value="" placeholder="Type city name, e.g. San Francisco" class="form-control cityname"/><span class="btn btn-default go">Go</span><span class="btn btn-info random">Random</span>
       </div>
@@ -53,31 +53,26 @@
             <td class="metricsimilar"><a href="#">Miami</a><a href="#">Detroit</a><a href="#">Seattle</a></td>
           </tr>
         </table>
-        <table class="metrics">
+        <table class="metrics"><% _.each(data, function(val) { %>
           <tr>
-            <td class="metricname">Area</td>
-            <td class="metricvalue">1531313 sqft</td>
-            <td class="metricsimilar"><a href="#">Houston</a><a href="#">Denver</a></td>
-          </tr>
-          <tr>
-            <td class="metricname">Population</td>
-            <td class="metricvalue">153131</td>
-            <td class="metricsimilar"><a href="#">Dallas</a><a href="#">Seattle</a></td>
-          </tr>
+            <td class="metricname"><%- val.label %></td>
+            <td class="metricvalue"><%- val.value %></td>
+            <td class="metricsimilar"><% _.each(val.sim, function(sim) { %><a href="#"><%- sim %></a><% }) %></td>
+          </tr><% }) %>
         </table>
       </div>
     </script>
-    <script id="template-comparison" type="text/html">
+    <script id="template-comparison" type="text/html"><!--
       <table class="metrics"><% _.each(data, function(row) { %>
         <tr>
           <th colspan="colspan" class="metricname"><%- row.metric.name %></th>
         </tr><% _.each(row.data, function(val) { %>
         <tr>
-          <td><%- val.name %></td>
+          <td><%- val.label %></td>
           <td><%- val.value %></td>
         </tr><% }) %>
         <% }) %>
-      </table>
+      </table>-->
     </script>
     <script id="template-list" type="text/html">
       <div class="selectpanel metric">

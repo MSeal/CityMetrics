@@ -1,10 +1,11 @@
-table.metrics
-  | <% _.each(data, function(row) { %>
-  tr
-    th(colspan).metricname <%- row.metric.name %>
-  | <% _.each(row.data, function(val) { %>
-  tr
-    td <%- val.name %>
-    td <%- val.value %>
-  | <% }) %>
-  | <% }) %>
+//
+  table.metrics
+    | <% _.each(data, function(row) { %>
+    tr
+      th(colspan).metricname <%- row.metric.name %>
+    | <% _.each(row.data, function(val) { %>
+    tr
+      td <%- val.label %>
+      td <%- val.value %>
+    | <% }) %>
+    | <% }) %>
