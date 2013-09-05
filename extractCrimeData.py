@@ -1,5 +1,6 @@
 import csv
 import os
+import re
 import sys
 import cPickle as pickle
 from glob import glob
@@ -48,37 +49,51 @@ def translateTitles(titles, titleReplace=None):
         titlesOut.pop()
     return titlesOut
 
+def processState(state):
+    # Strip numbers, hashes, commas, etc...
+    return " ".join(re.findall("[a-zA-Z\s]+", state)).title().strip()
+
 def extractSingleCSV(csvdata, titleReplace=None):
     titles = []
-    data = {"year" : None, "stats": {}}
+    data = {}
+    year = None
     priorRow = []
     for rnum,row in enumerate(csvdata):
         if rnum < 2:
             continue
         elif rnum == 2:
-            data["year"] = row[0].split()[-1]
+            year = row[0].split()[-1]
         elif rnum == 3:
             titles = translateTitles(row)
         else:
             # Capture state from previous entry if absent
             if not row[0]:
                 row[0] = priorRow[0]
-            state = row[0]
+            state = processState(row[0])
             city = row[1]
-            if state not in data["stats"]:
-                data["stats"][state] = {}
-            data["stats"][state][city] = zip(titles[2:], translateRowData(row[2:]))
+
+            # Skip data rows without city titles
+            if not city.strip():
+                continue
+
+            if state not in data:
+                data[state] = {}
+            
+            if city not in data[state]:
+                data[state][city] = {}
+            for key, value in zip(titles[2:], translateRowData(row[2:])):
+                data[state][city][key] = value
         priorRow = row
 
-    return data
+    return year, data
 
 def extractData(fnaming, titleReplace=None):
     data = {}
     for fname in glob(fnaming):
         flushPrint("Extracting data from %s" % fname)
         with open(fname, "rb") as csvfile:
-            fdata = extractSingleCSV(csv.reader(csvfile), titleReplace)
-            data[fdata["year"]] = fdata
+            year, fdata = extractSingleCSV(csv.reader(csvfile), titleReplace)
+            data[year] = fdata
     return data
 
 def saveDataDump(fname, data):

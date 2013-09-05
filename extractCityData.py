@@ -119,20 +119,15 @@ def mapResouces(fname, forcebuild=False):
 
 def selectResourcesByType(types, resouces, typeSelect):
     selectData = {}
-    attrCounter = 0
 
     validResources = set()
     for rtype, rset in types.iteritems():
         if rtype in typeSelect:
             validResources |= rset
-    print validResources
 
     for resource, attrs in resouces.iteritems():
-        #print resource
         if resource in validResources:
-            attrs["id"] = attrCounter
             selectData[resource] = attrs
-            attrCounter += 1
 
     return selectData
 
