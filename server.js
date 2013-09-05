@@ -1,3 +1,4 @@
+_ = require("underscore")
 
 var cfg = {
 	port: 3000,
@@ -69,6 +70,43 @@ app.get('/api/stats', function(req, res) {
 // list metrics for specified cities
 app.get('/api/compare', function(req, res) {
 
+});
+
+// list metrics for specified cities
+app.get('/api/metric', function(req, res) {
+	var field = req.query.field,
+		city = parseInt(req.query.id),
+		limit = parseInt(req.query.limit) || 10;
+
+    console.log(field, city, limit)
+	connection.query(
+		'SELECT ?? FROM ?? WHERE id = ?',
+		[field, cfg.table, city],
+		function(err, results) {
+			if (_.isEmpty(results)) {
+				res.send([]);
+			}
+			value = results[0][field]
+			console.log("value", value)
+			if (_.isNumber(value)) {
+				connection.query(
+					'SELECT * FROM ?? WHERE ?? IS NOT NULL ORDER BY ABS(?? - ?) LIMIT ?',
+					[cfg.table, field, field, value, limit],
+					function(err, results) {
+						res.send(results);
+					}
+				);
+			} else {
+				connection.query(
+					'SELECT * FROM ?? WHERE ?? = ? LIMIT ?',
+					[cfg.table, field, value, limit],
+					function(err, results) {
+						res.send(results);
+					}
+				);
+			}
+		}
+	);
 });
 
 app.listen(cfg.port);
