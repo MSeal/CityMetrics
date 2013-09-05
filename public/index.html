@@ -32,7 +32,8 @@
           <td class="dbtext">metrics</td>
         </tr>
       </table>
-      <div></div><% _.each(presets, function(val) { %>
+      <div></div>
+      <div class="suggestions"></div><% _.each(presets, function(val) { %>
       <div class="statinfo" data-preset="<%- val.preset %>">
       <a href="#" style="background: <%- val.color %>" class="preset statheader"><%- val.label %></a>
       <ol><% _.each(val.cities, function(city) { %>
@@ -75,6 +76,12 @@
       </table>-->
     </script>
     <script id="template-list" type="text/html">
+      <div class="selectpanel where">
+        <div href="#" class="metricheader statheader">Show</div>
+        <% _.each(wheres, function(val) { %>
+          <div data-value="<%- val.name %>" class="metricrow<%- val.name === where ? ' active' : ''%>"><%- val.label %></div>
+        <% }) %>
+      </div>
       <div class="selectpanel metric">
         <div href="#" class="metricheader statheader">Compare</div>
         <% _.each(metrics, function(val) { %>

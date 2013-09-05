@@ -241,3 +241,7 @@ table.suggestions td {
 table.suggestions a {
 	margin-right: 10px;
 }
+
+.suggestions a {
+	margin-right: 15px;
+}

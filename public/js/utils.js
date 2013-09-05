@@ -19,5 +19,10 @@ var utils = {
 	    }
 
 	    return label.join(', ');
+	},
+	api: function(uri, args, cb) {
+		$.getJSON('/api/'+uri, args, function(data) {
+			cb(null, data);
+		});
 	}
 };
