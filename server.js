@@ -41,11 +41,10 @@ app.get('/api/listmetric', function(req, res) {
 // list cities for specified US state
 app.get('/api/liststate', function(req, res) {
 	var state = req.query.state,
-		order = req.query.order === 'desc' ? 'DESC' : 'ASC',
 		limit = parseInt(req.query.limit) || 10;
 
 	connection.query(
-		'SELECT name FROM ?? WHERE state = ? ORDER BY name '+order+' LIMIT ?',
+		'SELECT name FROM ?? WHERE state = ? ORDER BY population DESC LIMIT ?',
 		[cfg.table, state, limit],
 		function(err, results) {
 			res.send(results);
