@@ -20,15 +20,14 @@ WIKI_STAT_RENAME = {"wgs84_pos#lat": "latitude", "wgs84_pos#long": "longitude", 
 WIKI_TYPE = { "area" : FLOAT_TYPE, "areaCode" : INT_TYPE, "areaLand" : FLOAT_TYPE, "areaTotal" : FLOAT_TYPE, 
               "areaWater" : FLOAT_TYPE, "country" : STR_TYPE, "daylightSavingTimeZone" : STR_TYPE, 
               "district" : STR_TYPE, "elevation" : FLOAT_TYPE, "foundingDate" : STR_TYPE, "governmentType" : STR_TYPE,
-              "homepage" : STR_TYPE, "isPartOf" : STR_TYPE, "latitude" : FLOAT_TYPE, "leaderName" : STR_TYPE,
-              "leaderTitle" : STR_TYPE, "longitude" : FLOAT_TYPE, "motto" : DESCRIPTION_TYPE, "name" : STR_TYPE,
-              "nickname" : STR_TYPE, "population" : INT_TYPE, "populationDensity" : FLOAT_TYPE, 
+              "homepage" : STR_TYPE, "latitude" : FLOAT_TYPE, "leaderName" : STR_TYPE, "leaderTitle" : STR_TYPE, 
+              "longitude" : FLOAT_TYPE, "motto" : DESCRIPTION_TYPE, "name" : STR_TYPE,
+              "nickname" : STR_TYPE, "parentGroup" : STR_TYPE, "population" : INT_TYPE, "populationDensity" : FLOAT_TYPE, 
               "populationMetro" : STR_TYPE, "postalCode" : STR_TYPE, "region" : STR_TYPE, "state" : STR_TYPE,
               "timeZone" : STR_TYPE, "type" : STR_TYPE, "utcOffset" : STR_TYPE }
 WIKI_STAT_NO_DUP = set(["area", "areaLand", "areaTotal", "areaWater", "country", "district", "elevation", 
                         "foundingDate", "governmentType", "homepage", "latitude", "leaderTitle", "longitude", 
-                        "name", "population", "populationDensity", "populationMetro", "region", 
-                        "state", "type"])
+                        "name", "population", "populationDensity", "populationMetro", "region", "state", "type"])
 WIKI_STAT_DUP = set([k for k in WIKI_TYPE.keys() if k not in WIKI_STAT_NO_DUP])
 WIKI_PRIMARY_TABLE = "cityPrimaryStats"
 
@@ -53,21 +52,20 @@ def createTables(cur):
     wikiItems = extractNoDupStats(WIKI_TYPE).items()
     wikiItems.sort(key=lambda kv: kv[0])
     cur.execute("CREATE TABLE `" + WIKI_PRIMARY_TABLE + "` (`id` INT NOT NULL PRIMARY KEY, " +
-        ", ".join([" ".join(["`"+k+"`", v]) for k,v in wikiItems]) + ") ENGINE=InnoDB;")
+        ", ".join([" ".join(["`"+k+"`", v]) for k,v in wikiItems]) + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
 
     for duplicate in WIKI_STAT_DUP:
         tableName = tableNameFromKey(duplicate)
         cur.execute("DROP TABLE IF EXISTS `%s`;" % tableName)
-        cur.execute("CREATE TABLE `%s` (cityId INT NOT NULL, %s %s) ENGINE=InnoDB;" % 
+        cur.execute("CREATE TABLE `%s` (cityId INT NOT NULL, %s %s) ENGINE=InnoDB DEFAULT CHARSET=utf8;" % 
             (tableName, duplicate, WIKI_TYPE[duplicate]))
 
 def cleanSQLValue(value, quoteChar="'"):
     if value == None:
         return "NULL"
-    if isinstance(value, basestring):
-        return "%s%s%s" % (quoteChar, value.replace(quoteChar, "\\"+quoteChar), quoteChar)
-    else:
-        return value
+    # if isinstance(value, basestring):
+    #     return "%s%s%s" % (quoteChar, value.replace(quoteChar, "\\"+quoteChar), quoteChar)
+    return value
 
 def cleanSQLValuesList(elems, quoteChar="'"):
     return [cleanSQLValue(e, quoteChar) for e in elems]
@@ -240,10 +238,10 @@ def removeUnderscores(stats):
 def squashStats(stats):
     statsOut = {}
     for key, vset in stats.items():
-        if key not in WIKI_TYPE:
-            continue
         if key in WIKI_STAT_RENAME:
             key = WIKI_STAT_RENAME[key]
+        if key not in WIKI_TYPE:
+            continue
         vset = convertSet(vset)
         # Convert to single value
         if key in WIKI_STAT_NO_DUP:
