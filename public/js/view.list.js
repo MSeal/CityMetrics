@@ -2,7 +2,8 @@ var ListView = BaseView.extend({
 	template: 'list',
 	events: {
 		'click .sort .metricrow': 'onSortChange',
-		'click .metric .metricrow': 'onMetricChange'
+		'click .metric .metricrow': 'onMetricChange',
+    'click .where .metricrow': 'onWhereChange'
 	},
 	onSortChange: function(ev) {
 		this.model.set('order', $(ev.target).data('value'));
@@ -12,6 +13,10 @@ var ListView = BaseView.extend({
 		this.model.set('sort', $(ev.target).data('value'));
 		//console.log('metric', $(ev.target).data('value'));
 	},
+  onWhereChange: function(ev) {
+    this.model.set('where', $(ev.target).data('value'));
+    //console.log('metric', $(ev.target).data('value'));
+  },
 	onCitySelect: function(city) {
 		this.trigger('go', city);
 	},

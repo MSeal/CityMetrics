@@ -26,9 +26,10 @@ app.get('/api/listmetric', function(req, res) {
 	var metric = req.query.metric,
 		sort = req.query.sort || 'name',
 		order = req.query.order === 'asc' ? 'ASC' : 'DESC',
+		where = req.query.where === 'usa' ? 'country = \'United States\' AND' : '';
 		limit = parseInt(req.query.limit) || 10;
 
-	var q = 'SELECT * FROM ?? WHERE country = \'United States\' AND ?? IS NOT NULL ORDER BY ?? '+order+' LIMIT ?',
+	var q = 'SELECT * FROM ?? WHERE '+where+' ?? IS NOT NULL ORDER BY ?? '+order+' LIMIT ?',
 		args = [cfg.table, sort, sort, limit];
 
 	console.log(q, args);
@@ -117,6 +118,22 @@ app.get('/api/compare', function(req, res) {
 	connection.query(q, args,
 		function(err, results) {
 			res.send(results);
+	});
+});
+
+app.get('/api/random', function(req, res) {
+	connection.query('SELECT count(*) as cnt FROM ??', [cfg.table], function(err, cnt) {
+		var limit = 1,
+			offset = Math.floor(Math.random()*cnt[0].cnt),
+			q = 'SELECT * FROM ?? LIMIT ? OFFSET ?',
+			args = [cfg.table, limit, offset];
+
+			console.log(q, args);
+
+			connection.query(q, args,
+				function(err, results) {
+					res.send(results);
+			});
 	});
 });
 

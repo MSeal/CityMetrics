@@ -7,7 +7,8 @@ var MainView = BaseView.extend({
 		'keydown .cityname': 'onKeydown',
     'click .statinfo li a': 'onLink',
     'click .examples a': 'onExample',
-    'click .statinfo a.preset': 'onPreset'
+    'click .statinfo a.preset': 'onPreset',
+    'click .suggestions a': 'onSuggestion'
 	},
 	onGo: function() {
 		var val = this.$el.find('.cityname').val();
@@ -42,12 +43,33 @@ var MainView = BaseView.extend({
     this.trigger('compare', val);
   },
 	onRender: function() {
-    drawMap();
+    drawMap(this);
     utils.createAutocomplete(this.$el.find('.city-inputs input'));
+  },
+  onStateClicked: function(state) {
+    var self = this;
+    if (state) {
+      //this.model.set({'state': state}, {silent: true});
+      utils.api('liststate', {state: state}, function(err, data) {
+        self.$el.find('.suggestions').html('');
+        data.forEach(function(city) {
+          self.$el.find('.suggestions').append(
+            $('<a>')
+              .attr({'href': '#', 'data-city': city.name+', '+state})
+              .text(city.name)
+          );
+        });
+      });
+    } else {
+      this.$el.find('.suggestions').html('');
+    }
+  },
+  onSuggestion: function(ev) {
+    this.trigger('go', $(ev.target).data('city'));
   }
 });
 
-function drawMap() {
+function drawMap(self) {
 	var width = 480,
     height = 250,
     centered;
@@ -151,7 +173,9 @@ function clicked(d) {
       return x.id == d.id;
     });
     state = state[0];
-    console.log(d.id, state.id, state.properties.NAME10);
+    state = state.properties.NAME10;
+
+    //console.log(d.id, state.id, state.properties.NAME10);
 
     var centroid = path.centroid(d);
     x = centroid[0];
@@ -165,6 +189,8 @@ function clicked(d) {
     centered = null;
   }
 
+  self.onStateClicked(state);
+
   g.selectAll("path")
       .classed("active", centered && function(d) { return d === centered; });
 
@@ -173,4 +199,7 @@ function clicked(d) {
       .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
       .style("stroke-width", 1.5 / k + "px");
 }
+
+
+
 }
