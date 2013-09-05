@@ -30,7 +30,13 @@ WIKI_STAT_NO_DUP = set(["areaLand", "areaTotal", "areaWater", "country", "distri
                         "name", "population", "populationDensity", "populationMetro", "region", "state", "type"])
 WIKI_STAT_DUP = set([k for k in WIKI_TYPE.keys() if k not in WIKI_STAT_NO_DUP])
 WIKI_POPULATION_FIXES = { "Nantong" : 7282835, "Durg" : 281436, "Johnstown,_Colorado" : 9887, "Milliken,_Colorado" : 6159 }
-WIKI_NAME_FIXES = { "250px" : "" }
+WIKI_NAME_RESOURCE_MATCHES = set(["250px", "220px", "765 hwy 367 judsonia arkansas"])
+WIKI_STATE_FIXES = { "Arkansas LMA" : "Arkansas", "Arkansas-" : "Arkansas", "Georgia WAH-LEH-SKA" : "Georgia", 
+                     "ia" : "Iowa", "Iowa home of RYAN LOVIN" : "Iowa", "Kentucky home of \\\"The Simpsons\\\"" : "Kentucky",
+                     "Minnesota!!!!" : "Minnesota", "MN" : "Minnesota", "New York (town)" : "New York", "NY" : "New York",
+                     "Nuwi ta" : "Oklahoma",  "OK" : "Oklahoma", "Texas aka \\\"WHIRLWIND COUNTRY\\\"" : "Texas",
+                     "Texas." : "Texas", "Tx" : "Texas", "Utahh" : "Utah", "Washington USA" : "Washington",
+                     "which means Golden Rivers in the Creek Indian language." : "Georgia", "Ok" : "Oklahoma" }
 WIKI_PRIMARY_TABLE = "cityPrimaryStats"
 CRIME_TABLE = "cityCrime"
 POLICE_TABLE = "cityPolice"
@@ -274,14 +280,17 @@ def squashStats(stats):
 
 def cleanResource(resource, stats):
     stats = squashStats(removeUnderscores(dropUnitsAndLanguage(stats)))
-    if "country" in stats and stats["country"] == "United States":
-        if "name" not in stats:
-            stats["name"] = ""
-        if "," in stats["name"]:
-            city, state = stats["name"].split(",", 1)
-            stats["name"] = city.strip()
-            if "state" not in stats:
-                stats["state"] = state.strip()
+    if "name" not in stats:
+        stats["name"] = ""
+    if "," in stats["name"]:
+        city, state = stats["name"].split(",")[:2]
+        stats["name"] = city.strip()
+        if "state" not in stats:
+            stats["state"] = state.strip()
+    elif "," in resource:
+        if "state" not in stats:
+            city, state = resource.replace("_", " ").split(",")[:2]
+            stats["state"] = state.strip()
     if "areaCode" in stats:
         expCodes = set([])
         for code in stats["areaCode"]:
@@ -305,8 +314,10 @@ def cleanResource(resource, stats):
         stats[stat] = cleanval
     if resource in WIKI_POPULATION_FIXES:
         stats["population"] = WIKI_POPULATION_FIXES[resource]
-    if resource in WIKI_NAME_FIXES:
-        stats["name"] = WIKI_NAME_FIXES[resource]
+    if "name" in stats and stats["name"] in WIKI_NAME_RESOURCE_MATCHES:
+        stats["name"] = resource.replace("_", " ")
+    if "state" in stats and stats["state"] in WIKI_STATE_FIXES:
+        stats["state"] = WIKI_STATE_FIXES[stats["state"]]
     return resource, stats
 
 def appendColumnCount(count, newcol):

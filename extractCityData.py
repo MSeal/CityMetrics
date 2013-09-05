@@ -7,7 +7,7 @@ import time
 DATA_DIR = "data"
 DATA_DUMP = "mappingbased_properties_en.ttl"
 DATA_OUT_DUMP = "city_resources"
-CITY_RESOURCES = ["City", "Town"]
+CITY_RESOURCES = ["City", "Town", "CityDistrict", "Village"]
 DEFAULT_LANGUAGE = "en"
 
 # Handle escaped quotes
@@ -47,7 +47,7 @@ def executeOnFile(fname, func):
     with open(fname, "rb") as rfile:
         return func(rfile)
 
-def cacheLoadBuild(fname, opname, builder, forcebuild=False):
+def cacheLoadBuild(fname, opname, builder, forcebuild=False, skipsave=False):
     try:
         if forcebuild:
             raise IOError("Force rebuild")
@@ -59,10 +59,11 @@ def cacheLoadBuild(fname, opname, builder, forcebuild=False):
         flushPrint("Rebuilding %s Cache..." % opname)
         sys.stdout.flush()
         cache = builder()
-        flushPrint("Saving %s Cache..." % opname)
-        sys.stdout.flush()
-        with open(fname+".pck", "wb") as pfile:
-            pickle.dump(cache, pfile)
+        if not skipsave:
+            flushPrint("Saving %s Cache..." % opname)
+            sys.stdout.flush()
+            with open(fname+".pck", "wb") as pfile:
+                pickle.dump(cache, pfile)
     return cache
 
 def parseQuotedValue(value):
@@ -114,8 +115,8 @@ def buildMap(rfile):
 
     return types, resources
 
-def mapResouces(fname, forcebuild=False):
-    return cacheLoadBuild(fname, "Resouce Mapping", lambda: executeOnFile(fname, buildMap), forcebuild)
+def mapResouces(fname, forcebuild=False, skipsave=False):
+    return cacheLoadBuild(fname, "Resouce Mapping", lambda: executeOnFile(fname, buildMap), forcebuild, skipsave)
 
 def selectResourcesByType(types, resouces, typeSelect):
     selectData = {}
@@ -133,8 +134,9 @@ def selectResourcesByType(types, resouces, typeSelect):
 
 def rawDataLoader(dataDump, *args):
     return list(mapResouces(dataDump)) + list(args)
+    #return list(mapResouces(dataDump, True, True)) + list(args)
 
-def extractCityData(processedDataDump, rawDataDump):
+def extractCityData(processedDataDump, rawDataDump, skipsave=False):
     return cacheLoadBuild(processedDataDump, "City Extraction", lambda: selectResourcesByType(*rawDataLoader(rawDataDump, CITY_RESOURCES)), True)
 
 if __name__ == "__main__":
