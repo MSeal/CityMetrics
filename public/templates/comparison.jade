@@ -1,12 +1,10 @@
-.citytitle Texas
-span vs.
-.citytitle Houston
-span vs.
-.citytitle Denver
 table.metrics
+  | <% _.each(data, function(row) { %>
   tr
-    td.metricname Area
-    td
+    th(colspan).metricname <%- row.metric.name %>
+  | <% _.each(row.data, function(val) { %>
   tr
-    td.metricname Population
-    td
+    td <%- val.name %>
+    td <%- val.value %>
+  | <% }) %>
+  | <% }) %>

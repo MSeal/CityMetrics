@@ -339,7 +339,7 @@ if __name__ == "__main__":
 
     con = None
     try:
-        con = sql.connect(host=host, user=user)
+        con = sql.connect(host=host, user=user, passwd="toor")
         cur = con.cursor()
         createDB(cur)
         createTables(cur)

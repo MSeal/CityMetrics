@@ -23,7 +23,7 @@ var ListView = BaseView.extend({
       "color": "#1f77b4",
       "values": (this.model.get('values')||[]).map(function(x) {
         return {
-          label: x.name,
+          label:  utils.createCityLabel(x),
           value: x[metric]
         }
       })
