@@ -28,7 +28,7 @@ var views = [
 			{"name":"areaLand","label":"Area Land","units":"m2"},
 			{"name":"areaWater","label":"Area Water","units":"m2"},
 
-			{"name":"elevation","label":"Elevation","units":"u"}
+			{"name":"elevation","label":"Elevation","units":"m"}
 
 			//{"name":"latitude","label":"Latitude"},
 			//{"name":"longitude","label":"Longitude"},
