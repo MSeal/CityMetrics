@@ -20,8 +20,9 @@ var app = express(),
 	connection = mysql.createConnection(cfg.mysql);
 
 function createTableSelect() {
-	return (" FROM `"+cfg.table+"` LEFT OUTER JOIN `"+cfg.crime+"` ON `"+cfg.table+"`.id = `"+cfg.crime+"`.cityId "
-		+ "LEFT OUTER JOIN `"+cfg.police+"` ON `"+cfg.table+"`.id = `"+cfg.police+"`.cityId ")
+	return (" FROM `"+cfg.table+"` LEFT OUTER JOIN `"+cfg.crime+"` ON `"+cfg.table+"`.id = `"+cfg.crime+
+		"`.cityId AND `"+cfg.crime+"`.year = 2011 LEFT OUTER JOIN `"+cfg.police+"` ON `"+cfg.table+"`.id = `"+
+		cfg.police+"`.cityId AND `"+cfg.police+"`.year = 2011")
 }   
 
 //connection.connect();
