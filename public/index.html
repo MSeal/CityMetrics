@@ -9,9 +9,9 @@
     <link rel="stylesheet" href="style.css"/>
     <script id="template-main" type="text/html">
       <div>Examples:</div>
-      <div class="examples"><a href="#">Huntsville, Texas vs. City of El Paso, United States</a><a href="#">San Francisco; Portland; Boulder; New York City</a></div><br/>
+      <div class="examples"><a href="#">San Jose, California vs. Baton Rouge, Louisiana</a><a href="#">Wichita, Kansas; Albuquerque, New Mexico; El Paso, Texas</a><a href="#">San Francisco; Portland; Boulder; New York City</a></div><br/>
       <div class="city-inputs">
-        <input type="text" value="" placeholder="Type city name, e.g. San Francisco" class="form-control cityname"/><span class="btn btn-default go">Go</span><span class="btn btn-info random">Random</span>
+        <input type="text" value="" placeholder="Type city name e.g. Portland, Oregon" class="form-control cityname"/><span class="btn btn-default go">Go</span><span class="btn btn-info random">Random</span>
       </div>
       <div>Select on map</div>
       <svg id="map"></svg>
@@ -43,17 +43,13 @@
     </script>
     <script id="template-detail" type="text/html">
       <div>
-        <div class="citytitle"><%- cities[0] %></div>
+        <div class="citytitle"><%- cities[0] %></div><!--
         <table class="suggestions">
           <tr>
             <td style="color: #888; text-align: right">similar cities</td>
             <td class="metricsimilar"><a href="#">Houston</a><a href="#">Denver</a><a href="#">Sacramento</a><a href="#">Phoenix</a></td>
           </tr>
-          <tr>
-            <td style="color: #888; text-align: right">closest cities</td>
-            <td class="metricsimilar"><a href="#">Miami</a><a href="#">Detroit</a><a href="#">Seattle</a></td>
-          </tr>
-        </table>
+        </table>-->
         <table class="metrics"><% _.each(data, function(val) { %>
           <tr>
             <td class="metricname"><%- val.label %></td>

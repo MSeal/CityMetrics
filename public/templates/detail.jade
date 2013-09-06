@@ -1,19 +1,15 @@
 div
   .citytitle <%- cities[0] %>
-  table.suggestions
-    tr
-      td(style='color: #888; text-align: right') similar cities
-      td.metricsimilar
-        a(href='#') Houston
-        a(href='#') Denver
-        a(href='#') Sacramento
-        a(href='#') Phoenix
-    tr
-      td(style='color: #888; text-align: right') closest cities
-      td.metricsimilar
-        a(href='#') Miami
-        a(href='#') Detroit
-        a(href='#') Seattle
+  //
+    table.suggestions
+      tr
+        td(style='color: #888; text-align: right') similar cities
+        td.metricsimilar
+          a(href='#') Houston
+          a(href='#') Denver
+          a(href='#') Sacramento
+          a(href='#') Phoenix
+
   table.metrics
     | <% _.each(data, function(val) { %>
     tr

@@ -51,7 +51,7 @@ var views = [
 			{"name":"violentCrime","label":"Violent Crime","units":"incidents"}
 			
 		],
-		sort: 'population',
+		sort: '',
 		sorts: [
 			{name: 'valueDesc', label: 'Value largest'},
 			{name: 'valueAsc', label: 'Value smallest'},
@@ -224,7 +224,7 @@ children.cityinput.model.on('change:cities', function() {
 					return {
 						label: label.label,
 						value: val + (label.units ? ' '+label.units : ''),
-						sim: ['Houston', 'Denver']
+						sim: []
 					};
 				}
 			}).filter(function(x) {return x});
@@ -263,7 +263,7 @@ children.list.model.on('change', function(model) {
 		var q = {
 			sort: model.get('order').match(/^value/) ? model.get('sort') : 'name',
 			order: model.get('order').match(/Asc$/) ? 'asc' : 'desc',
-			limit: 20,
+			limit: 50,
 			where: model.get('where')
 		};
 		utils.api('listmetric', q, function(err, data) {

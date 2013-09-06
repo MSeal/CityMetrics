@@ -207,6 +207,11 @@ a.statheader:hover {
 	width: 600px;
 }
 
+#list, #detail, #comparison {
+	margin-left: 30px;
+	margin-right: 30px;
+}
+
 .metricrow.active .units,
 .metricrow:hover .units {
 	color: #fff;
