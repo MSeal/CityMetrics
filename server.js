@@ -8,7 +8,9 @@ var cfg = {
 	  password : 'toor',
 	  database : 'metrics'
 	},
-	table: 'cityPrimaryStats'
+	table: 'cityPrimaryStats',
+	crime: 'cityCrime',
+	police: 'cityPolice'
 };
 
 var express = require('express'),
@@ -16,6 +18,11 @@ var express = require('express'),
 
 var app = express(),
 	connection = mysql.createConnection(cfg.mysql);
+
+function createTableSelect() {
+	return (" FROM `"+cfg.table+"` LEFT OUTER JOIN `"+cfg.crime+"` ON `"+cfg.table+"`.id = `"+cfg.crime+"`.cityId "
+		+ "LEFT OUTER JOIN `"+cfg.police+"` ON `"+cfg.table+"`.id = `"+cfg.police+"`.cityId ")
+}   
 
 //connection.connect();
 
@@ -29,8 +36,8 @@ app.get('/api/listmetric', function(req, res) {
 		where = req.query.where === 'usa' ? 'country = \'United States\' AND' : '';
 		limit = parseInt(req.query.limit) || 10;
 
-	var q = 'SELECT * FROM ?? WHERE '+where+' ?? IS NOT NULL ORDER BY ?? '+order+' LIMIT ?',
-		args = [cfg.table, sort, sort, limit];
+	var q = 'SELECT * '+createTableSelect()+' WHERE '+where+' ?? IS NOT NULL ORDER BY ?? '+order+' LIMIT ?',
+		args = [sort, sort, limit];
 
 	console.log(q, args);
 
@@ -45,8 +52,8 @@ app.get('/api/liststate', function(req, res) {
 		limit = parseInt(req.query.limit) || 10;
 
 	connection.query(
-		'SELECT name FROM ?? WHERE state = ? ORDER BY population DESC LIMIT ?',
-		[cfg.table, state, limit],
+		'SELECT name '+createTableSelect()+' WHERE state = ? ORDER BY population DESC LIMIT ?',
+		[state, limit],
 		function(err, results) {
 			res.send(results);
 	});
@@ -88,8 +95,8 @@ app.get('/api/autocomplete', function(req, res) {
 	var input = req.query.term.toLowerCase(),
 		limit = parseInt(req.query.limit) || 20;
 
-	var q = 'SELECT * FROM ?? WHERE '+createCityWhere(input)+' LIMIT ?',
-		args = [cfg.table, limit];
+	var q = 'SELECT * '+createTableSelect()+' WHERE '+createCityWhere(input)+' LIMIT ?',
+		args = [limit];
 
 	console.log(q, args);
 
@@ -110,8 +117,8 @@ app.get('/api/autocomplete', function(req, res) {
 app.get('/api/compare', function(req, res) {
 	var cities = req.query.cities,
 		limit = parseInt(req.query.limit) || 50,
-		q = 'SELECT * FROM ?? WHERE '+cities.map(createCityWhere).join(' OR ')+' LIMIT ?',
-		args = [cfg.table, limit];
+		q = 'SELECT * '+createTableSelect()+' WHERE '+cities.map(createCityWhere).join(' OR ')+' LIMIT ?',
+		args = [limit];
 
 	console.log(q, args);
 
@@ -125,8 +132,8 @@ app.get('/api/random', function(req, res) {
 	connection.query('SELECT count(*) as cnt FROM ??', [cfg.table], function(err, cnt) {
 		var limit = 1,
 			offset = Math.floor(Math.random()*cnt[0].cnt),
-			q = 'SELECT * FROM ?? LIMIT ? OFFSET ?',
-			args = [cfg.table, limit, offset];
+			q = 'SELECT * '+createTableSelect()+' LIMIT ? OFFSET ?',
+			args = [limit, offset];
 
 			console.log(q, args);
 
@@ -145,8 +152,8 @@ app.get('/api/metric', function(req, res) {
 
     console.log(field, city, limit)
 	connection.query(
-		'SELECT ?? FROM ?? WHERE id = ?',
-		[field, cfg.table, city],
+		'SELECT ?? '+createTableSelect()+' WHERE id = ?',
+		[field, city],
 		function(err, results) {
 			if (_.isEmpty(results)) {
 				res.send([]);
@@ -155,16 +162,16 @@ app.get('/api/metric', function(req, res) {
 			console.log("value", value)
 			if (_.isNumber(value)) {
 				connection.query(
-					'SELECT * FROM ?? WHERE ?? IS NOT NULL ORDER BY ABS(?? - ?) LIMIT ?',
-					[cfg.table, field, field, value, limit],
+					'SELECT * '+createTableSelect()+' WHERE ?? IS NOT NULL ORDER BY ABS(?? - ?) LIMIT ?',
+					[field, field, value, limit],
 					function(err, results) {
 						res.send(results);
 					}
 				);
 			} else {
 				connection.query(
-					'SELECT * FROM ?? WHERE ?? = ? LIMIT ?',
-					[cfg.table, field, value, limit],
+					'SELECT * '+createTableSelect()+' WHERE ?? = ? LIMIT ?',
+					[field, value, limit],
 					function(err, results) {
 						res.send(results);
 					}

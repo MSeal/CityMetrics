@@ -28,10 +28,10 @@ var views = [
 			{"name":"areaLand","label":"Area Land","units":"m2"},
 			{"name":"areaWater","label":"Area Water","units":"m2"},
 
-			{"name":"elevation","label":"Elevation","units":"u"}
+			{"name":"elevation","label":"Elevation","units":"m"},
 
-			//{"name":"latitude","label":"Latitude"},
-			//{"name":"longitude","label":"Longitude"},
+			{"name":"latitude","label":"Latitude","units":"meridians"},
+			{"name":"longitude","label":"Longitude","units":"meridians"}
 
 			//{"name":"foundingDate","label":"foundingDate"},
 			//{"name":"governmentType","label":"governmentType"},
@@ -128,26 +128,36 @@ var metrics = [
 	{"name":"populationMetro","label":"Population Metro","units":"people"},
 	{"name":"populationDensity","label":"Population Density","units":"people/sqkm"},
 	
-	// {"name":"country","label":"Country"},
-	// {"name":"state","label":"State"},
-	// {"name":"region","label":"Region"},
-	// {"name":"district","label":"District"},
+	{"name":"country","label":"Country"},
+	{"name":"state","label":"State"},
+	{"name":"region","label":"Region"},
+	{"name":"district","label":"District"},
 
 	{"name":"areaTotal","label":"Area","units":"m2"},
 	{"name":"areaLand","label":"Area Land","units":"m2"},
 	{"name":"areaWater","label":"Area Water","units":"m2"},
 
-	{"name":"elevation","label":"Elevation","units":"u"}
+	{"name":"elevation","label":"Elevation","units":"m"},
 
-	//{"name":"latitude","label":"Latitude"},
-	//{"name":"longitude","label":"Longitude"},
+	{"name":"latitude","label":"Latitude","units":"meridians"},
+	{"name":"longitude","label":"Longitude","units":"meridians"},
 
-	//{"name":"foundingDate","label":"foundingDate"},
-	//{"name":"governmentType","label":"governmentType"},
-	//{"name":"leaderTitle","label":"leaderTitle"},
-	//{"name":"name","label":"name"},
-	//{"name":"homepage","label":"homepage"},
-	
+	{"name":"foundingDate","label":"Founding Date"},
+	{"name":"governmentType","label":"Government Type"},
+	{"name":"leaderTitle","label":"Leader Title"},
+	{"name":"name","label":"Name"},
+	{"name":"homepage","label":"Homepage"},
+
+	{"name":"aggravatedAssault","label":"Aggravated Assault"},
+	{"name":"arson","label":"Arson"},
+	{"name":"burglary","label":"Burglary"},
+	{"name":"forcibleRape","label":"Forcible Rape"},
+	{"name":"larcenyTheft","label":"Larceny Theft"},
+	{"name":"motorTheft","label":"Motor Theft"},
+	{"name":"murderManslaughter","label":"Murder/Manslaughter"},
+	{"name":"propertyCrime","label":"Property Crime"},
+	{"name":"robbery","label":"Robbery"},
+	{"name":"violentCrime","label":"Violent Crime"}
 ];
 
 children.cityinput.model.on('change:cities', function() {
