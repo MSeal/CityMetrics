@@ -31,13 +31,24 @@ var views = [
 			{"name":"elevation","label":"Elevation","units":"m"},
 
 			{"name":"latitude","label":"Latitude","units":"meridians"},
-			{"name":"longitude","label":"Longitude","units":"meridians"}
+			{"name":"longitude","label":"Longitude","units":"meridians"},
 
 			//{"name":"foundingDate","label":"foundingDate"},
 			//{"name":"governmentType","label":"governmentType"},
 			//{"name":"leaderTitle","label":"leaderTitle"},
 			//{"name":"name","label":"name"},
 			//{"name":"homepage","label":"homepage"},
+
+			{"name":"aggravatedAssault","label":"Aggravated Assault","units":"incidents"},
+			{"name":"arson","label":"Arson","units":"incidents"},
+			{"name":"burglary","label":"Burglary","units":"incidents"},
+			{"name":"forcibleRape","label":"Forcible Rape","units":"incidents"},
+			{"name":"larcenyTheft","label":"Larceny Theft","units":"incidents"},
+			{"name":"motorTheft","label":"Motor Theft","units":"incidents"},
+			{"name":"murderManslaughter","label":"Murder/Manslaughter","units":"incidents"},
+			{"name":"propertyCrime","label":"Property Crime","units":"incidents"},
+			{"name":"robbery","label":"Robbery","units":"incidents"},
+			{"name":"violentCrime","label":"Violent Crime","units":"incidents"}
 			
 		],
 		sort: 'population',
@@ -148,16 +159,55 @@ var metrics = [
 	{"name":"name","label":"Name"},
 	{"name":"homepage","label":"Homepage"},
 
-	{"name":"aggravatedAssault","label":"Aggravated Assault"},
-	{"name":"arson","label":"Arson"},
-	{"name":"burglary","label":"Burglary"},
-	{"name":"forcibleRape","label":"Forcible Rape"},
-	{"name":"larcenyTheft","label":"Larceny Theft"},
-	{"name":"motorTheft","label":"Motor Theft"},
-	{"name":"murderManslaughter","label":"Murder/Manslaughter"},
-	{"name":"propertyCrime","label":"Property Crime"},
-	{"name":"robbery","label":"Robbery"},
-	{"name":"violentCrime","label":"Violent Crime"}
+	{"name":"aggravatedAssault","label":"Aggravated Assault","units":"incidents"},
+	{"name":"arson","label":"Arson","units":"incidents"},
+	{"name":"burglary","label":"Burglary","units":"incidents"},
+	{"name":"forcibleRape","label":"Forcible Rape","units":"incidents"},
+	{"name":"larcenyTheft","label":"Larceny Theft","units":"incidents"},
+	{"name":"motorTheft","label":"Motor Theft","units":"incidents"},
+	{"name":"murderManslaughter","label":"Murder/Manslaughter","units":"incidents"},
+	{"name":"propertyCrime","label":"Property Crime","units":"incidents"},
+	{"name":"robbery","label":"Robbery","units":"incidents"},
+	{"name":"violentCrime","label":"Violent Crime","units":"incidents"}
+];
+
+var compMetrics = [
+	//{"name":"type","label":"type"},
+
+	{"name":"population","label":"Population","units":"people"},
+	{"name":"populationMetro","label":"Population Metro","units":"people"},
+	{"name":"populationDensity","label":"Population Density","units":"people/sqkm"},
+	
+	// {"name":"country","label":"Country"},
+	// {"name":"state","label":"State"},
+	// {"name":"region","label":"Region"},
+	// {"name":"district","label":"District"},
+
+	{"name":"areaTotal","label":"Area","units":"m2"},
+	{"name":"areaLand","label":"Area Land","units":"m2"},
+	{"name":"areaWater","label":"Area Water","units":"m2"},
+
+	{"name":"elevation","label":"Elevation","units":"m"},
+
+	{"name":"latitude","label":"Latitude","units":"meridians"},
+	{"name":"longitude","label":"Longitude","units":"meridians"},
+
+	// {"name":"foundingDate","label":"Founding Date"},
+	// {"name":"governmentType","label":"Government Type"},
+	// {"name":"leaderTitle","label":"Leader Title"},
+	// {"name":"name","label":"Name"},
+	// {"name":"homepage","label":"Homepage"},
+
+	{"name":"aggravatedAssault","label":"Aggravated Assault","units":"incidents"},
+	{"name":"arson","label":"Arson","units":"incidents"},
+	{"name":"burglary","label":"Burglary","units":"incidents"},
+	{"name":"forcibleRape","label":"Forcible Rape","units":"incidents"},
+	{"name":"larcenyTheft","label":"Larceny Theft","units":"incidents"},
+	{"name":"motorTheft","label":"Motor Theft","units":"incidents"},
+	{"name":"murderManslaughter","label":"Murder/Manslaughter","units":"incidents"},
+	{"name":"propertyCrime","label":"Property Crime","units":"incidents"},
+	{"name":"robbery","label":"Robbery","units":"incidents"},
+	{"name":"violentCrime","label":"Violent Crime","units":"incidents"}
 ];
 
 children.cityinput.model.on('change:cities', function() {
@@ -184,12 +234,12 @@ children.cityinput.model.on('change:cities', function() {
 			show('cityinput', 'detail');
 		} else {
 			var out = [];
-			for (var i = 0; i < metrics.length; i+=1) {
+			for (var i = 0; i < compMetrics.length; i+=1) {
 				var row = [],
 					empty = true;
 
 				for (var j = 0; j < data.length; j+=1) {
-					var value = data[j][metrics[i].name];
+					var value = data[j][compMetrics[i].name];
 					row.push({label: utils.createCityLabel(data[j]), value: value});
 					if (value) {
 						empty = false;
@@ -197,7 +247,7 @@ children.cityinput.model.on('change:cities', function() {
 				}
 				row = _.uniq(row, function(x) { return x.label });
 				if (!empty) {
-					out.push({metric: metrics[i], data: row});
+					out.push({metric: compMetrics[i], data: row});
 				}
 			}
 
