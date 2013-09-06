@@ -19,10 +19,10 @@ var views = [
 			{"name":"populationMetro","label":"Population Metro","units":"people"},
 			{"name":"populationDensity","label":"Population Density","units":"people/sqkm"},
 			
-			{"name":"country","label":"Country"},
-			{"name":"state","label":"State"},
-			{"name":"region","label":"Region"},
-			{"name":"district","label":"District"},
+			// {"name":"country","label":"Country"},
+			// {"name":"state","label":"State"},
+			// {"name":"region","label":"Region"},
+			// {"name":"district","label":"District"},
 
 			{"name":"areaTotal","label":"Area","units":"m2"},
 			{"name":"areaLand","label":"Area Land","units":"m2"},
@@ -124,20 +124,20 @@ presets.forEach(function(x, i) {
 var metrics = [
 	//{"name":"type","label":"type"},
 
-	{"name":"population","label":"Population"},
-	{"name":"populationMetro","label":"Population Metro"},
-	{"name":"populationDensity","label":"Population Density"},
+	{"name":"population","label":"Population","units":"people"},
+	{"name":"populationMetro","label":"Population Metro","units":"people"},
+	{"name":"populationDensity","label":"Population Density","units":"people/sqkm"},
 	
-	//{"name":"country","label":"Country"},
-	//{"name":"state","label":"State"},
-	//{"name":"region","label":"Region"},
-	//{"name":"district","label":"District"},
+	// {"name":"country","label":"Country"},
+	// {"name":"state","label":"State"},
+	// {"name":"region","label":"Region"},
+	// {"name":"district","label":"District"},
 
-	{"name":"areaTotal","label":"Area"},
-	{"name":"areaLand","label":"Area Land"},
-	{"name":"areaWater","label":"Area Water"},
+	{"name":"areaTotal","label":"Area","units":"m2"},
+	{"name":"areaLand","label":"Area Land","units":"m2"},
+	{"name":"areaWater","label":"Area Water","units":"m2"},
 
-	{"name":"elevation","label":"Elevation"}
+	{"name":"elevation","label":"Elevation","units":"u"}
 
 	//{"name":"latitude","label":"Latitude"},
 	//{"name":"longitude","label":"Longitude"},
@@ -160,10 +160,10 @@ children.cityinput.model.on('change:cities', function() {
 		if (cities.length === 1) {
 			var out = _.map(data[0], function(val, key) {
 				var label = metrics.filter(function(x) {return x.name === key})[0];
-				if (label) {
+				if (label && val !== null) {
 					return {
 						label: label.label,
-						value: val,
+						value: val + (label.units ? ' '+label.units : ''),
 						sim: ['Houston', 'Denver']
 					};
 				}

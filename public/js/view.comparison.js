@@ -3,7 +3,9 @@ var ComparisonView = BaseView.extend({
 	onRender: function() {
 		var data = this.model.get('data');
 		data.forEach(function(metric) {
-			this.$el.append($('<div class="mname">').text(metric.metric.label));
+			this.$el.append($('<div class="mname">').text(
+				metric.metric.label + (metric.metric.units ? ' ('+metric.metric.units + ')' : '')
+			));
 			var chart = $('<div class="mchart"><svg></svg></div>');
 			this.$el.append(chart);
 

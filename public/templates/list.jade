@@ -6,7 +6,7 @@
 .selectpanel.metric.
   <div href="#" class="metricheader statheader">Compare</div>
   <% _.each(metrics, function(val) { %>
-    <div data-value="<%- val.name %>" class="metricrow<%- val.name === sort ? ' active' : ''%>"><%- val.label %></div>
+    <div data-value="<%- val.name %>" class="metricrow<%- val.name === sort ? ' active' : ''%>"><%- val.label %> <span class="units">(<%- val.units %>)</span></div>
   <% }) %>
 .selectpanel.sort.
   <div href="#" class="metricheader statheader">Sort</div>

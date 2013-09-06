@@ -206,6 +206,17 @@ a.statheader:hover {
 	width: 600px;
 }
 
+.metricrow.active .units,
+.metricrow:hover .units {
+	color: #fff;
+}
+
+.units {
+	font-size: 80%;
+	color: #838383;
+	margin-left: 20px;
+}
+
 .nv-y,
 .nv-x .tick line {
 	display: none;
