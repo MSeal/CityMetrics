@@ -39,6 +39,7 @@ nosetests.xml
 # Data dumps
 mappingbased_properties*
 data/archive
+city_resources*
 
 # Node
 node_modules

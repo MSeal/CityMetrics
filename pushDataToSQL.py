@@ -62,7 +62,8 @@ def createWikiTables(cur):
     wikiItems = extractNoDupStats(WIKI_TYPE).items()
     wikiItems.sort(key=lambda kv: kv[0])
     cur.execute("CREATE TABLE `" + WIKI_PRIMARY_TABLE + "` (`id` INT NOT NULL PRIMARY KEY, " +
-        ", ".join([" ".join(["`"+k+"`", v]) for k,v in wikiItems]) + ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+        ", ".join([" ".join(["`"+k+"`", v]) for k,v in wikiItems]) + 
+        ", `wikipedia` VARCHAR(255)) ENGINE=InnoDB DEFAULT CHARSET=utf8;")
 
     for duplicate in WIKI_STAT_DUP:
         tableName = tableNameFromKey(duplicate)
@@ -104,15 +105,15 @@ def insertWikiData(db, cur, wiki):
     columnByName = {}
     columnByName[WIKI_PRIMARY_TABLE] = list(WIKI_STAT_NO_DUP)
     columnByName[WIKI_PRIMARY_TABLE].sort()
-    columnByName[WIKI_PRIMARY_TABLE] = ["id"] + columnByName[WIKI_PRIMARY_TABLE]
+    columnByName[WIKI_PRIMARY_TABLE] = ["id"] + columnByName[WIKI_PRIMARY_TABLE] + ["wikipedia"]
     for duplicate in WIKI_STAT_DUP:
         columnByName[tableNameFromKey(duplicate)] = ["cityId", duplicate]
 
     insertData = resetInserts()
     for count, (resource, stats) in enumerate(wiki.iteritems()):
         id = count+1
-        insertData[WIKI_PRIMARY_TABLE].append(buildPrimaryValues(extractNoDupStats(stats).items() + [("id", id)], 
-                                                                 columnByName[WIKI_PRIMARY_TABLE]))
+        insertData[WIKI_PRIMARY_TABLE].append(buildPrimaryValues(extractNoDupStats(stats).items() +
+            [("id", id), ("wikipedia", resource)], columnByName[WIKI_PRIMARY_TABLE]))
         for dup, dupValues in extractDupStats(stats).items():
             insertData[tableNameFromKey(dup)].extend(buildDupValues(dup, dupValues, id))
 
@@ -134,7 +135,6 @@ def insertWikiData(db, cur, wiki):
 def buildWikiStateCityMap(wiki):
     wikimap = {}
     for resource, stats in wiki.iteritems():
-        #print "country" in stats, "country" in stats and stats["country"] == "United States", "state" in stats, "name" in stats
         if "country" in stats and stats["country"] == "United States" and "state" in stats and "name" in stats:
             wikimap[(stats["state"], stats["name"])] = stats
     return wikimap
@@ -280,7 +280,7 @@ def squashStats(stats):
 
 def cleanResource(resource, stats):
     stats = squashStats(removeUnderscores(dropUnitsAndLanguage(stats)))
-    if "name" not in stats:
+    if "name" not in stats or not isinstance(stats["name"], basestring):
         stats["name"] = ""
     if "," in stats["name"]:
         city, state = stats["name"].split(",")[:2]
@@ -312,10 +312,19 @@ def cleanResource(resource, stats):
         else:
             cleanval = value if value else None
         stats[stat] = cleanval
+
     if resource in WIKI_POPULATION_FIXES:
         stats["population"] = WIKI_POPULATION_FIXES[resource]
+
     if "name" in stats and stats["name"] in WIKI_NAME_RESOURCE_MATCHES:
         stats["name"] = resource.replace("_", " ")
+    if "name" in stats and stats["name"] and "City of " in stats["name"]:
+        stats["name"] = stats["name"].replace("City of ", "")
+    if "name" in stats and stats["name"] and "Town of " in stats["name"]:
+        stats["name"] = stats["name"].replace("Town of ", "")
+    if "name" in stats and stats["name"] and "Village of " in stats["name"]:
+        stats["name"] = stats["name"].replace("Village of ", "")
+
     if "state" in stats and stats["state"] in WIKI_STATE_FIXES:
         stats["state"] = WIKI_STATE_FIXES[stats["state"]]
     return resource, stats
@@ -368,13 +377,14 @@ if __name__ == "__main__":
 
     con = None
     try:
-        con = sql.connect(host=host, user=user, passwd=password)
+        con = sql.connect(host=host, user=user, passwd=password,
+            charset='utf8', use_unicode=True)
         cur = con.cursor()
         createDB(cur)
         createWikiTables(cur)
         insertWikiData(con, cur, wiki)
         insertFBIData(con, cur, crime, wiki, CRIME_TABLE)
-        insertFBIData(con, cur, police, wiki, POLICE_TABLE, ["population"])
+        insertFBIData(con, cur, police, wiki, POLICE_TABLE, ["populationFBI"])
     except sql.Error, e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit(1)

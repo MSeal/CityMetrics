@@ -31,7 +31,8 @@ POLICE_TITLE_REPLACEMENTS = {
     "Total law enforcement employees" : "lawEnforcementEmployees",
     "Total officers" : "officers",
     "Total civilians" : "civilians",
-    "Population" : "population"
+    "Population" : "populationFBI",
+    "population" : "populationFBI"
 }
 
 def flushPrint(message):

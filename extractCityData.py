@@ -3,11 +3,18 @@ import os
 import cPickle as pickle
 import sys
 import time
+import string
 
 DATA_DIR = "data"
 DATA_DUMP = "mappingbased_properties_en.ttl"
 DATA_OUT_DUMP = "city_resources"
-CITY_RESOURCES = ["City", "Town", "CityDistrict", "Village"]
+CITY_RESOURCES = ["City", "Town", "CityDistrict", "Village", "Independent_city", "County-controlled_city",
+                  "Consolidated_citycounty", "County-levelcity", "Prefecture-level_city", 
+                  "Provincial_city_(Republic_of_China)", "Lost_city", "Core_city", "County-level_city",
+                  "Independent_city_(United_States)", "Autonomous_city", "Capital_city", "Closed_city",
+                  "Statutory_city", "Lalitpur_sub-metropolitan_city", "New_England_city", "Provincial_city_(Vietnam)",
+                  "Sub-prefecture-level_city", "Village_(United_States)", "Township_(United_States)", 
+                  "Administrative_divisions_of_New_York", "_Feature"]
 DEFAULT_LANGUAGE = "en"
 
 # Handle escaped quotes
@@ -101,7 +108,7 @@ def buildMap(rfile):
         elif re.match(QUOTE_FOLLOWED_CAPTURE, value):
             value, unit, language = parseQuotedValue(value)
 
-        if attribute == "type":
+        if attribute == "type" or attribute == "22-rdf-syntax-ns#type":
             if value not in types:
                 types[value] = set()
             types[value].add(resource)
@@ -123,20 +130,25 @@ def selectResourcesByType(types, resouces, typeSelect):
 
     validResources = set()
     for rtype, rset in types.iteritems():
+        #flushPrint(rtype + " => " + filter(lambda c: c in string.printable, rtype))
+        # Repair type matching for non-ascii dashes
+        rtype = filter(lambda c: c in string.printable, rtype)
         if rtype in typeSelect:
             validResources |= rset
+    #print types.keys()
 
     for resource, attrs in resouces.iteritems():
-        if resource in validResources:
+        if resource in validResources and "populationTotal" in attrs:
             selectData[resource] = attrs
 
     return selectData
 
 def rawDataLoader(dataDump, *args):
     return list(mapResouces(dataDump)) + list(args)
+    #return list(mapResouces(dataDump, True)) + list(args)
     #return list(mapResouces(dataDump, True, True)) + list(args)
 
-def extractCityData(processedDataDump, rawDataDump, skipsave=False):
+def extractCityData(processedDataDump, rawDataDump):
     return cacheLoadBuild(processedDataDump, "City Extraction", lambda: selectResourcesByType(*rawDataLoader(rawDataDump, CITY_RESOURCES)), True)
 
 if __name__ == "__main__":
