@@ -16,7 +16,7 @@ var views = [
 			//{"name":"type","label":"type"},
 
 			{"name":"population","label":"Population","units":"people"},
-			{"name":"populationMetro","label":"Population Metro","units":"people"},
+			//{"name":"populationMetro","label":"Population Metro","units":"people"},
 			{"name":"populationDensity","label":"Population Density","units":"people/sqkm"},
 			
 			// {"name":"country","label":"Country"},
@@ -136,7 +136,7 @@ var metrics = [
 	//{"name":"type","label":"type"},
 
 	{"name":"population","label":"Population","units":"people"},
-	{"name":"populationMetro","label":"Population Metro","units":"people"},
+	//{"name":"populationMetro","label":"Population Metro","units":"people"},
 	{"name":"populationDensity","label":"Population Density","units":"people/sqkm"},
 	
 	{"name":"country","label":"Country"},
@@ -175,7 +175,7 @@ var compMetrics = [
 	//{"name":"type","label":"type"},
 
 	{"name":"population","label":"Population","units":"people"},
-	{"name":"populationMetro","label":"Population Metro","units":"people"},
+	//{"name":"populationMetro","label":"Population Metro","units":"people"},
 	{"name":"populationDensity","label":"Population Density","units":"people/sqkm"},
 	
 	// {"name":"country","label":"Country"},
