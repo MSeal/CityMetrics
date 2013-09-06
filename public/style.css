@@ -17,7 +17,8 @@ a:hover {
 }
 
 #main {
-	width: 800;
+	width: 900px;
+	padding-left: 140px;
 	margin: 0 auto;
 }
 

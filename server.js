@@ -74,15 +74,16 @@ app.get('/api/stats', function(req, res) {
 	});
 });
 
-function createCityWhere(input) {
+function createCityWhere(input, postfix) {
+	postfix = postfix || '';
 	var parts = input.split(',').map(function(x) { return x.replace(/^\s+|\s+$/g, '')}).filter(function(x) {return x});
 
-	var q = '(name COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[0]+'%');
+	var q = '(name COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[0]+postfix);
 
 	if (parts.length === 2) {
-		q += ' AND (state COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[1]+'%')+' OR country COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[1]+'%')+')';
+		q += ' AND (state COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[1]+postfix)+' OR country COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[1]+postfix)+')';
 	} else if (parts.length === 3) {
-		q += ' AND state COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[1]+'%')+' AND country COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[2]+'%');
+		q += ' AND state COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[1]+postfix)+' AND country COLLATE UTF8_GENERAL_CI LIKE '+connection.escape(parts[2]+postfix);
 	}
 
 	q += ')';
@@ -95,7 +96,7 @@ app.get('/api/autocomplete', function(req, res) {
 	var input = req.query.term.toLowerCase(),
 		limit = parseInt(req.query.limit) || 20;
 
-	var q = 'SELECT * '+createTableSelect()+' WHERE '+createCityWhere(input)+' LIMIT ?',
+	var q = 'SELECT * '+createTableSelect()+' WHERE '+createCityWhere(input, '%')+' LIMIT ?',
 		args = [limit];
 
 	console.log(q, args);
